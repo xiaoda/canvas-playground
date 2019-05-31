@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Basic Canvas</title>
+</head>
+<body>
+  <script src="utils.js"></script>
+  <script>
+    const Canvas = {
+      width: 300,
+      height: 300
+    }
+
+    prepareCanvas()
+    draw()
+
+    function prepareCanvas () {
+      document.write(`
+        <canvas id="canvas" width="${Canvas.width}" height="${Canvas.height}" style="width: ${Canvas.width / window.devicePixelRatio}px; height: ${Canvas.height / window.devicePixelRatio}px; border: 1px solid #333;"></canvas>
+      `)
+    }
+    function draw () {
+      const canvas = document.getElementById('canvas')
+      const ctx = canvas.getContext('2d')
+      ctx.fillStyle = 'green'
+      ctx.fillRect(10, 10, 100, 100)
+    }
+  </script>
+</body>
+</html>
