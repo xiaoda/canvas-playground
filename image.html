@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Image</title>
+  <style>
+    .block {margin: 10px 0;}
+  </style>
+</head>
+<body>
+  <div class="block">
+    <input id="upload" type="file" accept="image/*">
+  </div>
+  <div class="block action-btns">
+    <button data-action="rotateNegative90">-90°</button>
+    <button data-action="rotate90">90°</button>
+    <button data-action="rotate180">180°</button>
+    <button data-action="hMirror">Mirror(H)</button>
+    <button data-action="vMirror">Mirror(V)</button>
+    <button data-action="scale50">50%</button>
+    <button data-action="scale200">200%</button>
+  </div>
+  <canvas class="block"></canvas>
+
+  <script src="js/jquery.min.js"></script>
+  <script src="js/utils.js"></script>
+  <script>
+    const canvas = $('canvas').get(0)
+    const ctx = canvas.getContext('2d')
+
+    $('#upload').on('change', function (e) {
+      const image = new Image()
+      image.onload = draw
+      image.src = URL.createObjectURL(this.files[0])
+    })
+
+    $('.action-btns button').on('click', function () {
+      const action = $(this).data('action')
+      window[action]()
+    })
+
+    function _adjustCanvasSize (width, height) {
+      canvas.width = width
+      canvas.height = height
+      canvas.style.width = `${canvas.width / window.devicePixelRatio}px`
+      canvas.style.height = `${canvas.height / window.devicePixelRatio}px`
+    }
+
+    function _getImageData (sx = 0, sy = 0, sw = canvas.width, sh = canvas.height) {
+      return ctx.getImageData(sx, sy, sw, sh)
+    }
+
+    function draw () {
+      _adjustCanvasSize(this.width, this.height)
+      ctx.drawImage(this, 0, 0)
+    }
+
+    function rotateNegative90 () {
+      const distWidth = canvas.height
+      const distHeight = canvas.width
+      const {data} = _getImageData()
+      const distImageData = ctx.createImageData(distWidth, distHeight)
+      let distIndex = 0
+      for (let i = canvas.width - 1; i >= 0; i--) {
+        for (let j = 0; j < canvas.height; j++) {
+          const index = (j * canvas.width + i) * 4
+          distImageData.data[distIndex] = data[index]
+          distImageData.data[distIndex + 1] = data[index + 1]
+          distImageData.data[distIndex + 2] = data[index + 2]
+          distImageData.data[distIndex + 3] = data[index + 3]
+          distIndex += 4
+        }
+      }
+      _adjustCanvasSize(distWidth, distHeight)
+      ctx.putImageData(distImageData, 0, 0)
+    }
+
+    function rotate90 () {
+      const distWidth = canvas.height
+      const distHeight = canvas.width
+      const {data} = _getImageData()
+      const distImageData = ctx.createImageData(distWidth, distHeight)
+      let distIndex = 0
+      for (let i = 0; i < canvas.width; i++) {
+        for (let j = canvas.height - 1; j >= 0; j--) {
+          const index = (j * canvas.width + i) * 4
+          distImageData.data[distIndex] = data[index]
+          distImageData.data[distIndex + 1] = data[index + 1]
+          distImageData.data[distIndex + 2] = data[index + 2]
+          distImageData.data[distIndex + 3] = data[index + 3]
+          distIndex += 4
+        }
+      }
+      _adjustCanvasSize(distWidth, distHeight)
+      ctx.putImageData(distImageData, 0, 0)
+    }
+
+    function rotate180 () {
+      const distWidth = canvas.width
+      const distHeight = canvas.height
+      const {data} = _getImageData()
+      const distImageData = ctx.createImageData(distWidth, distHeight)
+      let distIndex = 0
+      for (let j = canvas.height - 1; j >= 0; j--) {
+        for (let i = canvas.width - 1; i >= 0; i--) {
+          const index = (j * canvas.width + i) * 4
+          distImageData.data[distIndex] = data[index]
+          distImageData.data[distIndex + 1] = data[index + 1]
+          distImageData.data[distIndex + 2] = data[index + 2]
+          distImageData.data[distIndex + 3] = data[index + 3]
+          distIndex += 4
+        }
+      }
+      _adjustCanvasSize(distWidth, distHeight)
+      ctx.putImageData(distImageData, 0, 0)
+    }
+
+    function hMirror () {
+      const distWidth = canvas.width
+      const distHeight = canvas.height
+      const {data} = _getImageData()
+      const distImageData = ctx.createImageData(distWidth, distHeight)
+      let distIndex = 0
+      for (let j = 0; j < canvas.height; j++) {
+        for (let i = canvas.width - 1; i >= 0; i--) {
+          const index = (j * canvas.width + i) * 4
+          distImageData.data[distIndex] = data[index]
+          distImageData.data[distIndex + 1] = data[index + 1]
+          distImageData.data[distIndex + 2] = data[index + 2]
+          distImageData.data[distIndex + 3] = data[index + 3]
+          distIndex += 4
+        }
+      }
+      _adjustCanvasSize(distWidth, distHeight)
+      ctx.putImageData(distImageData, 0, 0)
+    }
+
+    function vMirror () {
+      const distWidth = canvas.width
+      const distHeight = canvas.height
+      const {data} = _getImageData()
+      const distImageData = ctx.createImageData(distWidth, distHeight)
+      let distIndex = 0
+      for (let j = canvas.height - 1; j >= 0; j--) {
+        for (let i = 0; i < canvas.width; i++) {
+          const index = (j * canvas.width + i) * 4
+          distImageData.data[distIndex] = data[index]
+          distImageData.data[distIndex + 1] = data[index + 1]
+          distImageData.data[distIndex + 2] = data[index + 2]
+          distImageData.data[distIndex + 3] = data[index + 3]
+          distIndex += 4
+        }
+      }
+      _adjustCanvasSize(distWidth, distHeight)
+      ctx.putImageData(distImageData, 0, 0)
+    }
+
+    function scale50 () {
+      const distWidth = canvas.width / 2
+      const distHeight = canvas.height / 2
+      const {data} = _getImageData()
+      const distImageData = ctx.createImageData(distWidth, distHeight)
+      let distIndex = 0
+      for (let j = 0; j < canvas.height; j++) {
+        for (let i = 0; i < canvas.width; i++) {
+          if (j % 2 !== 0 && i % 2 !== 0) {
+            const index = (j * canvas.width + i) * 4
+            distImageData.data[distIndex] = data[index]
+            distImageData.data[distIndex + 1] = data[index + 1]
+            distImageData.data[distIndex + 2] = data[index + 2]
+            distImageData.data[distIndex + 3] = data[index + 3]
+            distIndex += 4
+          }
+        }
+      }
+      _adjustCanvasSize(distWidth, distHeight)
+      ctx.putImageData(distImageData, 0, 0)
+    }
+
+    function scale200 () {
+      const distWidth = canvas.width * 2
+      const distHeight = canvas.height * 2
+      const {data} = _getImageData()
+      const distImageData = ctx.createImageData(distWidth, distHeight)
+      let distIndex = 0
+      for (let j = 0; j < canvas.height; j++) {
+        for (let i = 0; i < canvas.width; i++) {
+          const index = (j * canvas.width + i) * 4
+          distImageData.data[distIndex] = data[index]
+          distImageData.data[distIndex + 1] = data[index + 1]
+          distImageData.data[distIndex + 2] = data[index + 2]
+          distImageData.data[distIndex + 3] = data[index + 3]
+          distImageData.data[distIndex + 4] = data[index]
+          distImageData.data[distIndex + 5] = data[index + 1]
+          distImageData.data[distIndex + 6] = data[index + 2]
+          distImageData.data[distIndex + 7] = data[index + 3]
+          distImageData.data[distWidth * 4 + distIndex] = data[index]
+          distImageData.data[distWidth * 4 + distIndex + 1] = data[index + 1]
+          distImageData.data[distWidth * 4 + distIndex + 2] = data[index + 2]
+          distImageData.data[distWidth * 4 + distIndex + 3] = data[index + 3]
+          distImageData.data[distWidth * 4 + distIndex + 4] = data[index]
+          distImageData.data[distWidth * 4 + distIndex + 5] = data[index + 1]
+          distImageData.data[distWidth * 4 + distIndex + 6] = data[index + 2]
+          distImageData.data[distWidth * 4 + distIndex + 7] = data[index + 3]
+          distIndex += 8
+          if (i % canvas.width === 0) {
+            distIndex += distWidth * 4
+          }
+        }
+      }
+      _adjustCanvasSize(distWidth, distHeight)
+      ctx.putImageData(distImageData, 0, 0)
+    }
+  </script>
+</body>
+</html>
