@@ -11,7 +11,7 @@
   <div class="block">
     <input id="upload" type="file" accept="image/*">
   </div>
-  <div class="block action-btns">
+  <div class="action-btns block">
     <button data-action="rotateNegative90">-90°</button>
     <button data-action="rotate90">90°</button>
     <button data-action="rotate180">180°</button>
@@ -19,6 +19,7 @@
     <button data-action="vMirror">Mirror(V)</button>
     <button data-action="scale50">50%</button>
     <button data-action="scale200">200%</button>
+    <button data-action="save">SAVE</button>
   </div>
   <canvas class="block"></canvas>
 
@@ -27,16 +28,18 @@
   <script>
     const canvas = $('canvas').get(0)
     const ctx = canvas.getContext('2d')
+    let fileName
 
     $('#upload').on('change', function (e) {
       const image = new Image()
       image.onload = draw
       image.src = URL.createObjectURL(this.files[0])
+      fileName = this.files[0].name
     })
 
     $('.action-btns button').on('click', function () {
       const action = $(this).data('action')
-      window[action]()
+      window[action] && window[action]()
     })
 
     function _adjustCanvasSize (width, height) {
@@ -210,6 +213,15 @@
       }
       _adjustCanvasSize(distWidth, distHeight)
       ctx.putImageData(distImageData, 0, 0)
+    }
+
+    function save () {
+      const link = document.createElement('a')
+      let type = fileName.match(/\.[^\.]+$/)[0].slice(1)
+      if (type === 'jpg') type = 'jpeg'
+      link.href = canvas.toDataURL(`image/${type}`)
+      link.download = fileName
+      link.click()
     }
   </script>
 </body>
