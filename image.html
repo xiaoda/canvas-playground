@@ -156,8 +156,8 @@
     }
 
     function scale50 () {
-      const distWidth = canvas.width / 2
-      const distHeight = canvas.height / 2
+      const distWidth = Math.floor(canvas.width / 2)
+      const distHeight = Math.floor(canvas.height / 2)
       const {data} = _getImageData()
       const distImageData = ctx.createImageData(distWidth, distHeight)
       let distIndex = 0
@@ -203,7 +203,7 @@
           distImageData.data[distWidth * 4 + distIndex + 6] = data[index + 2]
           distImageData.data[distWidth * 4 + distIndex + 7] = data[index + 3]
           distIndex += 8
-          if (i % canvas.width === 0) {
+          if ((i + 1) % canvas.width === 0) {
             distIndex += distWidth * 4
           }
         }
