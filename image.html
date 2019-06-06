@@ -11,15 +11,20 @@
   <div class="block">
     <input id="upload" type="file" accept="image/*">
   </div>
-  <div class="action-btns block">
-    <button data-action="rotateNegative90">-90°</button>
-    <button data-action="rotate90">90°</button>
-    <button data-action="rotate180">180°</button>
-    <button data-action="hMirror">Mirror(H)</button>
-    <button data-action="vMirror">Mirror(V)</button>
-    <button data-action="scale50">50%</button>
-    <button data-action="scale200">200%</button>
-    <button data-action="save">SAVE</button>
+  <div class="action-btns">
+    <div class="block">
+      <button data-action="back">Back</button>
+      <button data-action="save">Save</button>
+    </div>
+    <div class="block">
+      <button data-action="rotateNegative90">-90°</button>
+      <button data-action="rotate90">90°</button>
+      <button data-action="rotate180">180°</button>
+      <button data-action="hMirror">Mirror(H)</button>
+      <button data-action="vMirror">Mirror(V)</button>
+      <button data-action="scale50">50%</button>
+      <button data-action="scale200">200%</button>
+    </div>
   </div>
   <canvas class="block"></canvas>
 
@@ -28,11 +33,16 @@
   <script>
     const canvas = $('canvas').get(0)
     const ctx = canvas.getContext('2d')
+    const history = []
     let fileName
 
     $('#upload').on('change', function (e) {
       const image = new Image()
-      image.onload = draw
+      image.onload = function () {
+        _adjustCanvasSize(this.width, this.height)
+        ctx.drawImage(this, 0, 0)
+        _saveToHistory()
+      }
       image.src = URL.createObjectURL(this.files[0])
       fileName = this.files[0].name
     })
@@ -53,9 +63,26 @@
       return ctx.getImageData(sx, sy, sw, sh)
     }
 
-    function draw () {
-      _adjustCanvasSize(this.width, this.height)
-      ctx.drawImage(this, 0, 0)
+    function _saveToHistory () {
+      history.push(_getImageData())
+    }
+
+    function back () {
+      if (history.length > 1) {
+        history.pop()
+        const imageData = history[history.length - 1]
+        _adjustCanvasSize(imageData.width, imageData.height)
+        ctx.putImageData(imageData, 0, 0)
+      }
+    }
+
+    function save () {
+      const link = document.createElement('a')
+      let type = fileName.match(/\.[^\.]+$/)[0].slice(1)
+      if (type === 'jpg') type = 'jpeg'
+      link.href = canvas.toDataURL(`image/${type}`)
+      link.download = fileName
+      link.click()
     }
 
     function rotateNegative90 () {
@@ -76,6 +103,7 @@
       }
       _adjustCanvasSize(distWidth, distHeight)
       ctx.putImageData(distImageData, 0, 0)
+      _saveToHistory()
     }
 
     function rotate90 () {
@@ -96,6 +124,7 @@
       }
       _adjustCanvasSize(distWidth, distHeight)
       ctx.putImageData(distImageData, 0, 0)
+      _saveToHistory()
     }
 
     function rotate180 () {
@@ -116,6 +145,7 @@
       }
       _adjustCanvasSize(distWidth, distHeight)
       ctx.putImageData(distImageData, 0, 0)
+      _saveToHistory()
     }
 
     function hMirror () {
@@ -136,6 +166,7 @@
       }
       _adjustCanvasSize(distWidth, distHeight)
       ctx.putImageData(distImageData, 0, 0)
+      _saveToHistory()
     }
 
     function vMirror () {
@@ -156,6 +187,7 @@
       }
       _adjustCanvasSize(distWidth, distHeight)
       ctx.putImageData(distImageData, 0, 0)
+      _saveToHistory()
     }
 
     function scale50 () {
@@ -178,6 +210,7 @@
       }
       _adjustCanvasSize(distWidth, distHeight)
       ctx.putImageData(distImageData, 0, 0)
+      _saveToHistory()
     }
 
     function scale200 () {
@@ -213,15 +246,7 @@
       }
       _adjustCanvasSize(distWidth, distHeight)
       ctx.putImageData(distImageData, 0, 0)
-    }
-
-    function save () {
-      const link = document.createElement('a')
-      let type = fileName.match(/\.[^\.]+$/)[0].slice(1)
-      if (type === 'jpg') type = 'jpeg'
-      link.href = canvas.toDataURL(`image/${type}`)
-      link.download = fileName
-      link.click()
+      _saveToHistory()
     }
   </script>
 </body>
