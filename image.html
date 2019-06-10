@@ -24,6 +24,7 @@
       <button data-action="vMirror">Mirror(V)</button>
       <button data-action="scale50">50%</button>
       <button data-action="scale200">200%</button>
+      <button data-action="gray">Gray</button>
     </div>
   </div>
   <canvas class="block"></canvas>
@@ -246,6 +247,24 @@
       }
       _adjustCanvasSize(distWidth, distHeight)
       ctx.putImageData(distImageData, 0, 0)
+      _saveToHistory()
+    }
+
+    function gray () {
+      const imageData = _getImageData()
+      const data = imageData.data
+      for (let i = 0; i < data.length; i += 4) {
+        //*/
+        const ratio = {r: 1 / 3, g: 1 / 3, b: 1 / 3}
+        // const ratio = {r: 0.3, g: 0.59, b: 0.11}
+        const gray = ratio.r * data[i] + ratio.g * data[i + 1] + ratio.b * data[i + 2]
+        /*/
+        const gray = Math.max(data[i], data[i + 1], data[i + 2])
+        // const gray = Math.min(data[i], data[i + 1], data[i + 2])
+        //*/
+        data[i] = data[i + 1] = data[i + 2] = gray
+      }
+      ctx.putImageData(imageData, 0, 0)
       _saveToHistory()
     }
   </script>
