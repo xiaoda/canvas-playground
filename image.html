@@ -25,11 +25,18 @@
       <button data-action="scale50">50%</button>
       <button data-action="scale200">200%</button>
       <button data-action="gray">Gray</button>
+      <button data-action="decreaseSaturation">Saturation-</button>
+      <button data-action="increaseSaturation">Saturation+</button>
+      <button data-action="decreaseLightness">Lightness-</button>
+      <button data-action="increaseLightness">Lightness+</button>
+      <button data-action="decreaseValue">Value-</button>
+      <button data-action="increaseValue">Value+</button>
     </div>
   </div>
   <canvas class="block"></canvas>
 
   <script src="js/jquery.min.js"></script>
+  <script src="js/tinycolor.js"></script>
   <script src="js/utils.js"></script>
   <script>
     const canvas = $('canvas').get(0)
@@ -255,14 +262,140 @@
       const data = imageData.data
       for (let i = 0; i < data.length; i += 4) {
         //*/
-        const ratio = {r: 1 / 3, g: 1 / 3, b: 1 / 3}
-        // const ratio = {r: 0.3, g: 0.59, b: 0.11}
+        const ratio = {r: 0.3, g: 0.59, b: 0.11}
+        // const ratio = {r: 1 / 3, g: 1 / 3, b: 1 / 3}
         const gray = ratio.r * data[i] + ratio.g * data[i + 1] + ratio.b * data[i + 2]
         /*/
         const gray = Math.max(data[i], data[i + 1], data[i + 2])
         // const gray = Math.min(data[i], data[i + 1], data[i + 2])
         //*/
         data[i] = data[i + 1] = data[i + 2] = gray
+      }
+      ctx.putImageData(imageData, 0, 0)
+      _saveToHistory()
+    }
+
+    function decreaseSaturation () {
+      const imageData = _getImageData()
+      const data = imageData.data
+      for (let i = 0; i < data.length; i += 4) {
+        const color = tinycolor({
+          r: data[i],
+          g: data[i + 1],
+          b: data[i + 2]
+        })
+        const hsl = color.toHsl()
+        hsl.s -= hsl.s * 0.15
+        const newColor = tinycolor(hsl)
+        const newRgb = newColor.toRgb()
+        data[i] = newRgb.r
+        data[i + 1] = newRgb.g
+        data[i + 2] = newRgb.b
+      }
+      ctx.putImageData(imageData, 0, 0)
+      _saveToHistory()
+    }
+
+    function increaseSaturation () {
+      const imageData = _getImageData()
+      const data = imageData.data
+      for (let i = 0; i < data.length; i += 4) {
+        const color = tinycolor({
+          r: data[i],
+          g: data[i + 1],
+          b: data[i + 2]
+        })
+        const hsl = color.toHsl()
+        hsl.s += (1 - hsl.s) * 0.15
+        const newColor = tinycolor(hsl)
+        const newRgb = newColor.toRgb()
+        data[i] = newRgb.r
+        data[i + 1] = newRgb.g
+        data[i + 2] = newRgb.b
+      }
+      ctx.putImageData(imageData, 0, 0)
+      _saveToHistory()
+    }
+
+    function decreaseLightness () {
+      const imageData = _getImageData()
+      const data = imageData.data
+      for (let i = 0; i < data.length; i += 4) {
+        const color = tinycolor({
+          r: data[i],
+          g: data[i + 1],
+          b: data[i + 2]
+        })
+        const hsl = color.toHsl()
+        hsl.l -= hsl.l * 0.15
+        const newColor = tinycolor(hsl)
+        const newRgb = newColor.toRgb()
+        data[i] = newRgb.r
+        data[i + 1] = newRgb.g
+        data[i + 2] = newRgb.b
+      }
+      ctx.putImageData(imageData, 0, 0)
+      _saveToHistory()
+    }
+
+    function increaseLightness () {
+      const imageData = _getImageData()
+      const data = imageData.data
+      for (let i = 0; i < data.length; i += 4) {
+        const color = tinycolor({
+          r: data[i],
+          g: data[i + 1],
+          b: data[i + 2],
+        })
+        const hsl = color.toHsl()
+        hsl.l += (1 - hsl.l) * 0.15
+        const newColor = tinycolor(hsl)
+        const newRgb = newColor.toRgb()
+        data[i] = newRgb.r
+        data[i + 1] = newRgb.g
+        data[i + 2] = newRgb.b
+      }
+      ctx.putImageData(imageData, 0, 0)
+      _saveToHistory()
+    }
+
+    function decreaseValue () {
+      const imageData = _getImageData()
+      const data = imageData.data
+      for (let i = 0; i < data.length; i += 4) {
+        const color = tinycolor({
+          r: data[i],
+          g: data[i + 1],
+          b: data[i + 2],
+        })
+        const hsv = color.toHsv()
+        hsv.v -= hsv.v * 0.15
+        const newColor = tinycolor(hsv)
+        const newRgb = newColor.toRgb()
+        data[i] = newRgb.r
+        data[i + 1] = newRgb.g
+        data[i + 2] = newRgb.b
+      }
+      ctx.putImageData(imageData, 0, 0)
+      _saveToHistory()
+    }
+
+    function increaseValue () {
+      const imageData = _getImageData()
+      const data = imageData.data
+      for (let i = 0; i < data.length; i += 4) {
+        const color = tinycolor({
+          r: data[i],
+          g: data[i + 1],
+          b: data[i + 2],
+        })
+        const hsv = color.toHsv()
+        hsv.v += (1 - hsv.v) * 0.15
+        const newColor = tinycolor(hsv)
+        const newRgb = newColor.toRgb()
+        data[i] = newRgb.r
+        data[i + 1] = newRgb.g
+        data[i + 2] = newRgb.b
       }
       ctx.putImageData(imageData, 0, 0)
       _saveToHistory()
