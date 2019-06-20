@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Save</title>
+  <style>
+    .block {margin: 10px 0;}
+  </style>
+</head>
+<body>
+  <div class="block">
+    <input id="upload" type="file" accept="image/*">
+  </div>
+  <div class="action-btns">
+    <div class="block">Save as</div>
+    <div class="block">
+      <button data-action="savePNG">PNG</button>
+      <button data-action="saveJPG">JPG</button>
+      <button data-action="saveWebP">WebP</button>
+    </div>
+    <div class="block">
+      <button data-action="saveFull">Full</button>
+    </div>
+  </div>
+  <canvas class="block"></canvas>
+
+  <script src="js/jquery.min.js"></script>
+  <script src="js/utils.js"></script>
+  <script>
+    const canvas = $('canvas').get(0)
+    const ctx = canvas.getContext('2d')
+    let fileName
+
+    $('#upload').on('change', function (e) {
+      const image = new Image()
+      image.onload = function () {
+        _adjustCanvasSize(this.width, this.height)
+        ctx.drawImage(this, 0, 0)
+      }
+      image.src = URL.createObjectURL(this.files[0])
+      fileName = this.files[0].name
+    })
+
+    $('.action-btns button').on('click', function () {
+      const action = $(this).data('action')
+      window[action] && window[action]()
+    })
+
+    function _adjustCanvasSize (width, height) {
+      canvas.width = width
+      canvas.height = height
+      canvas.style.width = `${canvas.width / window.devicePixelRatio}px`
+      canvas.style.height = `${canvas.height / window.devicePixelRatio}px`
+    }
+
+    function _getImageData (sx = 0, sy = 0, sw = canvas.width, sh = canvas.height) {
+      return ctx.getImageData(sx, sy, sw, sh)
+    }
+
+    function _downloadImage (dataUrl, format = 'png') {
+      const link = document.createElement('a')
+      link.href = dataUrl
+      link.download = fileName.replace(/\.[^\.]+$/, `.${format}`)
+      link.click()
+    }
+
+    function _downloadString (text, format, type = 'text/plain') {
+      const blob = new Blob([text], {type})
+      const link = document.createElement('a')
+      link.href = URL.createObjectURL(blob)
+      link.download = fileName.replace(/\.[^\.]+$/, `.${format}`)
+      link.click()
+    }
+
+    function savePNG () {
+      const dataUrl = canvas.toDataURL('image/png')
+      _downloadImage(dataUrl)
+    }
+
+    function saveJPG () {
+      const dataUrl = canvas.toDataURL('image/jpeg')
+      _downloadImage(dataUrl, 'jpg')
+    }
+
+    function saveWebP () {
+      const dataUrl = canvas.toDataURL('image/webp')
+      _downloadImage(dataUrl, 'webp')
+    }
+
+    function saveFull () {
+      const {data} = _getImageData()
+      _downloadString(data.toString(), 'full')
+    }
+  </script>
+</body>
+</html>
