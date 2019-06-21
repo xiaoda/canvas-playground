@@ -45,6 +45,7 @@
     let fileName
 
     $('#upload').on('change', function (e) {
+      fileName = this.files[0].name
       const image = new Image()
       image.onload = function () {
         _adjustCanvasSize(this.width, this.height)
@@ -52,7 +53,6 @@
         _saveToHistory()
       }
       image.src = URL.createObjectURL(this.files[0])
-      fileName = this.files[0].name
     })
 
     $('.action-btns button').on('click', function () {

@@ -2,24 +2,29 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Save</title>
+  <title>Export</title>
   <style>
     .block {margin: 10px 0;}
   </style>
 </head>
 <body>
   <div class="block">
-    <input id="upload" type="file" accept="image/*">
+    <input id="upload" type="file">
   </div>
   <div class="action-btns">
-    <div class="block">Save as</div>
+    <div class="block">Import as</div>
     <div class="block">
-      <button data-action="savePNG">PNG</button>
-      <button data-action="saveJPG">JPG</button>
-      <button data-action="saveWebP">WebP</button>
+      <button data-action="importImage">Image</button>
+      <button data-action="importCustom">Custom</button>
+    </div>
+    <div class="block">Export as</div>
+    <div class="block">
+      <button data-action="exportPNG">PNG</button>
+      <button data-action="exportJPG">JPG</button>
+      <button data-action="exportWebP">WebP</button>
     </div>
     <div class="block">
-      <button data-action="saveFull">Full</button>
+      <button data-action="exportFull">Full</button>
     </div>
   </div>
   <canvas class="block"></canvas>
@@ -30,16 +35,6 @@
     const canvas = $('canvas').get(0)
     const ctx = canvas.getContext('2d')
     let fileName
-
-    $('#upload').on('change', function (e) {
-      const image = new Image()
-      image.onload = function () {
-        _adjustCanvasSize(this.width, this.height)
-        ctx.drawImage(this, 0, 0)
-      }
-      image.src = URL.createObjectURL(this.files[0])
-      fileName = this.files[0].name
-    })
 
     $('.action-btns button').on('click', function () {
       const action = $(this).data('action')
@@ -72,24 +67,58 @@
       link.click()
     }
 
-    function savePNG () {
+    function importImage () {
+      const image = new Image()
+      const [file] = $('#upload').get(0).files
+      fileName = file.name
+      image.onload = function () {
+        _adjustCanvasSize(this.width, this.height)
+        ctx.drawImage(this, 0, 0)
+      }
+      image.src = URL.createObjectURL(file)
+    }
+
+    function importCustom () {
+      const [file] = $('#upload').get(0).files
+      fileName = file.name
+      const fileFormat = fileName.match(/\.[^\.]+$/)[0].slice(1)
+      const fileReader = new FileReader()
+      fileReader.onload = function () {
+        switch (fileFormat) {
+          case 'full':
+            let [width, height, data] = this.result.split(';')
+            const imageData = ctx.createImageData(width, height)
+            data = data.split(',')
+            for (let i = 0; i < data.length; i++) {
+              imageData.data[i] = Number(data[i])
+            }
+            _adjustCanvasSize(width, height)
+            ctx.putImageData(imageData, 0, 0)
+            break
+        }
+      }
+      fileReader.readAsText(file)
+    }
+
+    function exportPNG () {
       const dataUrl = canvas.toDataURL('image/png')
       _downloadImage(dataUrl)
     }
 
-    function saveJPG () {
+    function exportJPG () {
       const dataUrl = canvas.toDataURL('image/jpeg')
       _downloadImage(dataUrl, 'jpg')
     }
 
-    function saveWebP () {
+    function exportWebP () {
       const dataUrl = canvas.toDataURL('image/webp')
       _downloadImage(dataUrl, 'webp')
     }
 
-    function saveFull () {
-      const {data} = _getImageData()
-      _downloadString(data.toString(), 'full')
+    function exportFull () {
+      const {width, height, data} = _getImageData()
+      const dataString = `${width};${height};${data.toString()}`
+      _downloadString(dataString, 'full')
     }
   </script>
 </body>
