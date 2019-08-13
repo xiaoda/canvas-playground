@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Camera Photo</title>
+  <style>
+    #preview {width: 100%;}
+  </style>
+</head>
+<body>
+  <input type="file" accept="image/*" onchange="loadImage(event)">
+  <img id="preview" src="">
+
+  <script>
+    function loadImage (event) {
+      const preview = document.getElementById('preview')
+      preview.src = URL.createObjectURL(event.target.files[0])
+    }
+  </script>
+</body>
+</html>
