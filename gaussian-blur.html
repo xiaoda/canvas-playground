@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Gaussian Blur Algorithm</title>
+</head>
+<body>
+  <script>
+    const sigma = 6
+    const blurRadius = 3
+    const weightArr = []
+    const formatWeightArr = []
+
+    function getWeight (x, y) {
+      return (1 / (Math.PI * 2 * sigma ** 2)) * Math.E ** ((x ** 2 + y ** 2) * -1 / (sigma ** 2 * 2))
+    }
+    function calculateWeightMatrix () {
+      for (let i = 0; i < blurRadius * 2 + 1; i++) {
+        const row = []
+        for (let j = 0; j < blurRadius * 2 + 1; j++) {
+          row.push(getWeight(j - blurRadius, i - blurRadius))
+        }
+        weightArr.push(row)
+      }
+    }
+    function formatWeightMatrix () {
+      let sum = 0
+      for (let i = 0; i < blurRadius * 2 + 1; i++) {
+        for (let j = 0; j < blurRadius * 2 + 1; j++) {
+          sum += weightArr[i][j]
+        }
+      }
+      const ratio = 1 / sum
+      for (let i = 0; i < blurRadius * 2 + 1; i++) {
+        const row = []
+        for (let j = 0; j < blurRadius * 2 + 1; j++) {
+          row.push(weightArr[i][j] * ratio)
+        }
+        formatWeightArr.push(row)
+      }
+    }
+
+    calculateWeightMatrix()
+    formatWeightMatrix()
+    console.log(formatWeightArr)
+    // console.log(JSON.stringify(formatWeightArr))
+  </script>
+</body>
+</html>
