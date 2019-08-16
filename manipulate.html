@@ -107,8 +107,8 @@
       const distImageData = ctx.createImageData(distWidth, distHeight)
       for (let i = 0; i < distHeight; i++) {
         for (let j = 0; j < distWidth; j++) {
-          const index = (i * canvas.width + (canvas.width - j)) * 4
           const distIndex = (i * distWidth + j) * 4
+          const index = (i * canvas.width + (canvas.width - j)) * 4
           distImageData.data[distIndex] = data[index]
           distImageData.data[distIndex + 1] = data[index + 1]
           distImageData.data[distIndex + 2] = data[index + 2]
@@ -126,8 +126,8 @@
       const distImageData = ctx.createImageData(distWidth, distHeight)
       for (let i = 0; i < distHeight; i++) {
         for (let j = 0; j < distWidth; j++) {
-          const index = ((canvas.height - i) * canvas.width + j) * 4
           const distIndex = (i * distWidth + j) * 4
+          const index = ((canvas.height - i) * canvas.width + j) * 4
           distImageData.data[distIndex] = data[index]
           distImageData.data[distIndex + 1] = data[index + 1]
           distImageData.data[distIndex + 2] = data[index + 2]
@@ -145,8 +145,8 @@
       const distImageData = ctx.createImageData(distWidth, distHeight)
       for (let i = 0; i < distHeight; i++) {
         for (let j = 0; j < distWidth; j++) {
-          const index = (j * canvas.width + (canvas.width - i)) * 4
           const distIndex = (i * distWidth + j) * 4
+          const index = (j * canvas.width + (canvas.width - i)) * 4
           distImageData.data[distIndex] = data[index]
           distImageData.data[distIndex + 1] = data[index + 1]
           distImageData.data[distIndex + 2] = data[index + 2]
@@ -164,8 +164,8 @@
       const distImageData = ctx.createImageData(distWidth, distHeight)
       for (let i = 0; i < distHeight; i++) {
         for (let j = 0; j < distWidth; j++) {
-          const index = ((canvas.height - j) * canvas.width + i) * 4
           const distIndex = (i * distWidth + j) * 4
+          const index = ((canvas.height - j) * canvas.width + i) * 4
           distImageData.data[distIndex] = data[index]
           distImageData.data[distIndex + 1] = data[index + 1]
           distImageData.data[distIndex + 2] = data[index + 2]
@@ -183,8 +183,8 @@
       const distImageData = ctx.createImageData(distWidth, distHeight)
       for (let i = 0; i < distHeight; i++) {
         for (let j = 0; j < distWidth; j++) {
-          const index = ((canvas.height - i) * canvas.width + (canvas.width - j)) * 4
           const distIndex = (i * distWidth + j) * 4
+          const index = ((canvas.height - i) * canvas.width + (canvas.width - j)) * 4
           distImageData.data[distIndex] = data[index]
           distImageData.data[distIndex + 1] = data[index + 1]
           distImageData.data[distIndex + 2] = data[index + 2]
@@ -197,13 +197,13 @@
 
     function scale50 () {
       const {data} = _getImageData()
-      const distWidth = Math.ceil(canvas.width / 2)
-      const distHeight = Math.ceil(canvas.height / 2)
+      const distWidth = Math.floor(canvas.width / 2)
+      const distHeight = Math.floor(canvas.height / 2)
       const distImageData = ctx.createImageData(distWidth, distHeight)
       for (let i = 0; i < distHeight; i++) {
         for (let j = 0; j < distWidth; j++) {
-          const index = ((i * 2 + 1) * canvas.width + (j * 2 + 1)) * 4
           const distIndex = (i * distWidth + j) * 4
+          const index = distIndex * 2
           distImageData.data[distIndex] = data[index]
           distImageData.data[distIndex + 1] = data[index + 1]
           distImageData.data[distIndex + 2] = data[index + 2]
@@ -221,8 +221,8 @@
       const distImageData = ctx.createImageData(distWidth, distHeight)
       for (let i = 0; i < distHeight; i++) {
         for (let j = 0; j < distWidth; j++) {
-          const index = (Math.floor(i / 2) * canvas.width + Math.floor(j / 2)) * 4
           const distIndex = (i * distWidth + j) * 4
+          const index = (Math.floor(i / 2) * canvas.width + Math.floor(j / 2)) * 4
           distImageData.data[distIndex] = data[index]
           distImageData.data[distIndex + 1] = data[index + 1]
           distImageData.data[distIndex + 2] = data[index + 2]
