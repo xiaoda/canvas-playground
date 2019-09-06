@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Wheel Trace</title>
+  <style>
+    canvas {
+      display: block;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <button data-action="wheelMove">START</button>
+  <canvas></canvas>
+  <script src="js/jquery.min.js"></script>
+  <script src="js/geometry-utils.js"></script>
+  <script>
+    const canvas = $('canvas').get(0)
+    canvas.width = canvas.height = 600
+    const ctx = canvas.getContext('2d')
+    const midpoint = [canvas.width * .5, canvas.height * .5]
+    const wheelDistance = 100
+    const steeringRadian = Math.PI * .25
+    const step = 50
+    const interval = 50
+
+    class Wheel {
+      constructor (options) {
+        this.options = {...options}
+        this.setPosition(options.position)
+      }
+      setPosition (position = midpoint) {
+        this.position = position
+        this.move()
+      }
+      move () {
+        ctx.fillStyle = this.options.fillStyle
+        ctx.beginPath()
+        ctx.arc(...this.position, 1, 0, Math.PI * 2)
+        ctx.closePath()
+        ctx.fill()
+      }
+    }
+
+    const frontWheel = new Wheel({
+      position: midpoint,
+      fillStyle: '#f60'
+    })
+    const rearWheel = new Wheel({
+      position: [midpoint[0], midpoint[1] + wheelDistance],
+      fillStyle: '#06f'
+    })
+
+    function _transformCoordinate (position) {
+      return [position[0], canvas.height - position[1]]
+    }
+    function wheelMove () {
+      const frontWheelRadian = GeometryUtils.getRadianFromXAxis(
+        GeometryUtils.getVector(
+          _transformCoordinate(rearWheel.position),
+          _transformCoordinate(frontWheel.position)
+        )
+      ) - steeringRadian
+      const frontWheelPosition = GeometryUtils.getPointByPointRadianDistance(
+        _transformCoordinate(frontWheel.position),
+        frontWheelRadian,
+        step
+      )
+      frontWheel.setPosition(_transformCoordinate(frontWheelPosition))
+    }
+    wheelMove()
+
+    $('[data-action]').on('click', function () {
+      const action = $(this).data('action')
+      try {
+        window[action]()
+      } catch (e) {}
+    })
+  </script>
+</body>
+</html>

@@ -11,34 +11,31 @@
   <div class="block">
     <input id="upload" type="file" accept="image/*">
   </div>
-  <div class="action-btns">
-    <div class="block">
-      <button data-action="hMirror">Mirror(H)</button>
-      <button data-action="vMirror">Mirror(V)</button>
-      <button data-action="rotateNegative90">-90°</button>
-      <button data-action="rotate90">90°</button>
-      <button data-action="rotate180">180°</button>
-      <button data-action="scale50">50%</button>
-      <button data-action="scale200">200%</button>
-    </div>
-    <div class="block">
-      <button data-action="gray">Gray</button>
-      <button data-action="decreaseSaturation">Saturation-</button>
-      <button data-action="increaseSaturation">Saturation+</button>
-      <button data-action="decreaseLightness">Lightness-</button>
-      <button data-action="increaseLightness">Lightness+</button>
-      <button data-action="gaussianBlur">Gaussian Blur</button>
-    </div>
-    <div class="block">
-      <button data-action="back">← Back</button>
-      <button data-action="save">↓ Save</button>
-    </div>
+  <div class="block">
+    <button data-action="hMirror">Mirror(H)</button>
+    <button data-action="vMirror">Mirror(V)</button>
+    <button data-action="rotateNegative90">-90°</button>
+    <button data-action="rotate90">90°</button>
+    <button data-action="rotate180">180°</button>
+    <button data-action="scale50">50%</button>
+    <button data-action="scale200">200%</button>
+  </div>
+  <div class="block">
+    <button data-action="gray">Gray</button>
+    <button data-action="decreaseSaturation">Saturation-</button>
+    <button data-action="increaseSaturation">Saturation+</button>
+    <button data-action="decreaseLightness">Lightness-</button>
+    <button data-action="increaseLightness">Lightness+</button>
+    <button data-action="gaussianBlur">Gaussian Blur</button>
+  </div>
+  <div class="block">
+    <button data-action="back">← Back</button>
+    <button data-action="save">↓ Save</button>
   </div>
   <canvas class="block"></canvas>
 
   <script src="js/jquery.min.js"></script>
   <script src="js/tinycolor.min.js"></script>
-  <script src="js/utils.js"></script>
   <script>
     const canvas = $('canvas').get(0)
     const ctx = canvas.getContext('2d')
@@ -56,7 +53,7 @@
       image.src = URL.createObjectURL(this.files[0])
     })
 
-    $('.action-btns button').on('click', function () {
+    $('[data-action]').on('click', function () {
       const action = $(this).data('action')
       try {
         window[action]()
