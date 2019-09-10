@@ -23,19 +23,20 @@
     const midpoint = [canvas.width * .5, canvas.height * .5]
     const wheelDistance = 100
     const steeringRadian = Math.PI * .25
-    const step = 50
-    const interval = 50
+    const step = 1
+    const correction = .0035 * -1
+    const interval = 5
 
     class Wheel {
       constructor (options) {
         this.options = {...options}
-        this.setPosition(options.position)
+        this.move(options.position)
       }
-      setPosition (position = midpoint) {
+      move (position = midpoint) {
         this.position = position
-        this.move()
+        this.draw()
       }
-      move () {
+      draw () {
         ctx.fillStyle = this.options.fillStyle
         ctx.beginPath()
         ctx.arc(...this.position, 1, 0, Math.PI * 2)
@@ -49,7 +50,7 @@
       fillStyle: '#f60'
     })
     const rearWheel = new Wheel({
-      position: [midpoint[0], midpoint[1] + wheelDistance],
+      position: GeometryUtils.getPointByOffset(midpoint, {y: wheelDistance}),
       fillStyle: '#06f'
     })
 
@@ -68,9 +69,20 @@
         frontWheelRadian,
         step
       )
-      frontWheel.setPosition(_transformCoordinate(frontWheelPosition))
+      const rearWheelVector = GeometryUtils.getVector(
+        _transformCoordinate(rearWheel.position),
+        _transformCoordinate(frontWheel.position)
+      )
+      const rearWheelStep = step * Math.abs(Math.cos(steeringRadian + correction))
+      const rearWheelPosition = GeometryUtils.getPointByPointVectorDistance(
+        _transformCoordinate(rearWheel.position),
+        rearWheelVector,
+        rearWheelStep
+      )
+      frontWheel.move(_transformCoordinate(frontWheelPosition))
+      rearWheel.move(_transformCoordinate(rearWheelPosition))
+      setTimeout(wheelMove, interval)
     }
-    wheelMove()
 
     $('[data-action]').on('click', function () {
       const action = $(this).data('action')
