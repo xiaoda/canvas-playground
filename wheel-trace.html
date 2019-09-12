@@ -12,50 +12,145 @@
   </style>
 </head>
 <body>
-  <button data-action="wheelMove">START</button>
+  <button data-action="wheelMove">MOVE</button>
   <canvas></canvas>
   <script src="js/jquery.min.js"></script>
   <script src="js/geometry-utils.js"></script>
   <script>
+    /* 常量 */
     const canvas = $('canvas').get(0)
     canvas.width = canvas.height = 600
     const ctx = canvas.getContext('2d')
     const midpoint = [canvas.width * .5, canvas.height * .5]
+    const wheelSpacing = 60
     const wheelDistance = 100
     const steeringRadian = Math.PI * .25
     const step = 1
     const correction = .0035 * -1
-    const interval = 5
+    const interval = 10
 
+    /* 车轮类 */
     class Wheel {
-      constructor (options) {
+      constructor (options = {}) {
         this.options = {...options}
-        this.move(options.position)
+        this.positions = []
+        this.setPosition(options.position)
       }
-      move (position = midpoint) {
+      setPosition (position = midpoint) {
         this.position = position
+        this.positions.push(this.position)
         this.draw()
       }
       draw () {
         ctx.fillStyle = this.options.fillStyle
-        ctx.beginPath()
-        ctx.arc(...this.position, 1, 0, Math.PI * 2)
-        ctx.closePath()
-        ctx.fill()
+        this.positions.forEach(position => {
+          ctx.beginPath()
+          ctx.arc(...position, 1, 0, Math.PI * 2)
+          ctx.closePath()
+          ctx.fill()
+        })
       }
     }
 
+    /* 轴类 */
+    class Axle {
+      constructor (options = {}) {
+        this.options = {...options}
+        this.setPositions(...options.positions)
+      }
+      setPositions (frontWheelPosition, rearWheelPosition) {
+        this.positions = [frontWheelPosition, rearWheelPosition]
+        this.draw()
+      }
+      draw () {
+        ctx.lineWidth = 2
+        ctx.strokeStyle = this.options.strokeStyle
+        ctx.beginPath()
+        ctx.moveTo(...this.positions[0])
+        ctx.lineTo(...this.positions[1])
+        ctx.closePath()
+        ctx.stroke()
+      }
+    }
+
+    /* 实例 */
+    const frontWheelOriginalPosition = midpoint
+    const distalFrontWheelOriginalPosition = GeometryUtils.getPointByOffset(
+      midpoint, {
+        x: wheelSpacing * -1
+      }
+    )
+    const rearWheelOriginalPosition = GeometryUtils.getPointByOffset(
+      midpoint, {
+        y: wheelDistance
+      }
+    )
+    const distalRearWheelOriginalPosition = GeometryUtils.getPointByOffset(
+      midpoint, {
+        x: wheelSpacing * -1,
+        y: wheelDistance
+      }
+    )
     const frontWheel = new Wheel({
-      position: midpoint,
+      position: frontWheelOriginalPosition,
+      fillStyle: '#f60'
+    })
+    const distalFrontWheel = new Wheel({
+      position: distalFrontWheelOriginalPosition,
       fillStyle: '#f60'
     })
     const rearWheel = new Wheel({
-      position: GeometryUtils.getPointByOffset(midpoint, {y: wheelDistance}),
+      position: rearWheelOriginalPosition,
       fillStyle: '#06f'
     })
+    const distalRearWheel = new Wheel({
+      position: distalRearWheelOriginalPosition,
+      fillStyle: '#06f'
+    })
+    const axle = new Axle({
+      positions: [
+        frontWheelOriginalPosition,
+        rearWheelOriginalPosition
+      ],
+      strokeStyle: '#666'
+    })
+    const frontAxle = new Axle({
+      positions: [
+        frontWheelOriginalPosition,
+        distalFrontWheelOriginalPosition
+      ],
+      strokeStyle: '#666'
+    })
+    const rearAxle = new Axle({
+      positions: [
+        rearWheelOriginalPosition,
+        distalRearWheelOriginalPosition
+      ],
+      strokeStyle: '#666'
+    })
+    const distalAxle = new Axle({
+      positions: [
+        distalFrontWheelOriginalPosition,
+        distalRearWheelOriginalPosition
+      ],
+      strokeStyle: '#666'
+    })
 
+    /* 过程 */
     function _transformCoordinate (position) {
       return [position[0], canvas.height - position[1]]
+    }
+    function drawOriginalAxles () {
+      ctx.lineWidth = 2
+      ctx.strokeStyle = '#ccc'
+      ctx.setLineDash([5, 5])
+      ctx.beginPath()
+      ctx.moveTo(...frontWheelOriginalPosition)
+      ctx.lineTo(...rearWheelOriginalPosition)
+      ctx.lineTo(...distalRearWheelOriginalPosition)
+      ctx.lineTo(...distalFrontWheelOriginalPosition)
+      ctx.closePath()
+      ctx.stroke()
     }
     function wheelMove () {
       const frontWheelRadian = GeometryUtils.getRadianFromXAxis(
@@ -79,11 +174,39 @@
         rearWheelVector,
         rearWheelStep
       )
-      frontWheel.move(_transformCoordinate(frontWheelPosition))
-      rearWheel.move(_transformCoordinate(rearWheelPosition))
-      setTimeout(wheelMove, interval)
+      const verticalVector = GeometryUtils.getVerticalVector(rearWheelVector, 0)
+      const distalFrontWheelPosition = GeometryUtils.getPointByPointVectorDistance(
+        frontWheelPosition, verticalVector, wheelSpacing
+      )
+      const distalRearWheelPosition = GeometryUtils.getPointByPointVectorDistance(
+        rearWheelPosition, verticalVector, wheelSpacing
+      )
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      drawOriginalAxles()
+      frontWheel.setPosition(_transformCoordinate(frontWheelPosition))
+      rearWheel.setPosition(_transformCoordinate(rearWheelPosition))
+      distalFrontWheel.setPosition(_transformCoordinate(distalFrontWheelPosition))
+      distalRearWheel.setPosition(_transformCoordinate(distalRearWheelPosition))
+      axle.setPositions(
+        _transformCoordinate(frontWheelPosition),
+        _transformCoordinate(rearWheelPosition)
+      )
+      frontAxle.setPositions(
+        _transformCoordinate(frontWheelPosition),
+        _transformCoordinate(distalFrontWheelPosition)
+      )
+      rearAxle.setPositions(
+        _transformCoordinate(rearWheelPosition),
+        _transformCoordinate(distalRearWheelPosition)
+      )
+      distalAxle.setPositions(
+        _transformCoordinate(distalFrontWheelPosition),
+        _transformCoordinate(distalRearWheelPosition)
+      )
+      if (rearWheelVector[1] > 0) setTimeout(wheelMove, interval)
     }
 
+    /* 页面 */
     $('[data-action]').on('click', function () {
       const action = $(this).data('action')
       try {
