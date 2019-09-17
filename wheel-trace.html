@@ -12,7 +12,9 @@
   </style>
 </head>
 <body>
-  <button data-action="wheelMove">MOVE</button>
+  <button data-action="moveForward">Forward</button>
+  <button data-action="moveBack">Back</button>
+  <button data-action="reset">Reset</button>
   <canvas></canvas>
   <script src="js/jquery.min.js"></script>
   <script src="js/geometry-utils.js"></script>
@@ -22,12 +24,14 @@
     canvas.width = canvas.height = 600
     const ctx = canvas.getContext('2d')
     const midpoint = [canvas.width * .5, canvas.height * .5]
-    const wheelSpacing = 60
     const wheelDistance = 100
-    const steeringRadian = Math.PI * .25
-    const step = 1
-    const correction = .0035 * -1
+    const wheelSpacing = 60
     const interval = 10
+    const step = 1
+    let direction
+    let steeringRadian
+    let correction
+    let wheelMoveTimeout
 
     /* 车轮类 */
     class Wheel {
@@ -65,6 +69,7 @@
       draw () {
         ctx.lineWidth = 2
         ctx.strokeStyle = this.options.strokeStyle
+        ctx.setLineDash([])
         ctx.beginPath()
         ctx.moveTo(...this.positions[0])
         ctx.lineTo(...this.positions[1])
@@ -164,9 +169,12 @@
         frontWheelRadian,
         step
       )
-      const rearWheelVector = GeometryUtils.getVector(
+      const rearWheelVector = direction === 'forward' ? GeometryUtils.getVector(
         _transformCoordinate(rearWheel.position),
         _transformCoordinate(frontWheel.position)
+      ) : GeometryUtils.getVector(
+        _transformCoordinate(frontWheel.position),
+        _transformCoordinate(rearWheel.position)
       )
       const rearWheelStep = step * Math.abs(Math.cos(steeringRadian + correction))
       const rearWheelPosition = GeometryUtils.getPointByPointVectorDistance(
@@ -174,7 +182,10 @@
         rearWheelVector,
         rearWheelStep
       )
-      const verticalVector = GeometryUtils.getVerticalVector(rearWheelVector, 0)
+      const verticalVector = GeometryUtils.getVerticalVector(
+        rearWheelVector,
+        direction === 'back'
+      )
       const distalFrontWheelPosition = GeometryUtils.getPointByPointVectorDistance(
         frontWheelPosition, verticalVector, wheelSpacing
       )
@@ -203,7 +214,29 @@
         _transformCoordinate(distalFrontWheelPosition),
         _transformCoordinate(distalRearWheelPosition)
       )
-      if (rearWheelVector[1] > 0) setTimeout(wheelMove, interval)
+      if (
+        (direction === 'forward' && rearWheelVector[1] > 0) ||
+        (direction === 'back' && rearWheelVector[1] < 0)
+      ) {
+        wheelMoveTimeout = setTimeout(wheelMove, interval)
+      }
+    }
+    function moveForward () {
+      direction = 'forward'
+      steeringRadian = Math.PI * .25
+      correction = .0035 * -1
+      clearTimeout(wheelMoveTimeout)
+      wheelMove()
+    }
+    function moveBack () {
+      direction = 'back'
+      steeringRadian = Math.PI * .75 * -1
+      correction = .0035
+      clearTimeout(wheelMoveTimeout)
+      wheelMove()
+    }
+    function reset () {
+      window.location.reload()
     }
 
     /* 页面 */
