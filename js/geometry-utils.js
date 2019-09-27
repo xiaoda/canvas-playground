@@ -21,6 +21,12 @@ const GeometryUtils = {
     return !!smallerCount && !!biggerCount &&
            (smallerCount % 2 === 1 || biggerCount % 2 === 1)
   },
+  mix (a, b, ratio) {
+    return a * (1 - ratio) + b * ratio
+  },
+  clamp (min, max, x) {
+    return Math.min(Math.max(x, min), max)
+  },
   formatRadian (radian) {
     while (Math.abs(radian) > Math.PI) {
       radian += Math.PI * 2 * (radian / Math.abs(radian)) * -1
@@ -42,8 +48,8 @@ const GeometryUtils = {
   },
   getMidPointBetweenPoints (pointA, pointB, ratio = .5) {
     return [
-      pointA[0] * (1 - ratio) + pointB[0] * ratio,
-      pointA[1] * (1 - ratio) + pointB[1] * ratio
+      this.mix(pointA[0], pointB[0], ratio),
+      this.mix(pointA[1], pointB[1], ratio)
     ]
   },
   getPointBetweenPointsByX (pointA, pointB, x) {

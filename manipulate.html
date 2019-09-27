@@ -55,10 +55,10 @@
 
     $('[data-action]').on('click', function () {
       const action = $(this).data('action')
-      try {
+      if (window[action]) {
         window[action]()
         _saveToHistory()
-      } catch (e) {}
+      }
     })
 
     function _adjustCanvasSize (width, height) {
@@ -68,7 +68,11 @@
       canvas.style.height = `${canvas.height / window.devicePixelRatio}px`
     }
 
-    function _getImageData (sx = 0, sy = 0, sw = canvas.width, sh = canvas.height) {
+    function _getImageData (
+      sx = 0, sy = 0,
+      sw = canvas.width,
+      sh = canvas.height
+    ) {
       return ctx.getImageData(sx, sy, sw, sh)
     }
 
@@ -232,10 +236,10 @@
 
     function gray () {
       const imageData = _getImageData()
-      const data = imageData.data
+      const {data} = imageData
+      const ratio = {r: .3, g: .59, b: .11}
+      // const ratio = {r: 1 / 3, g: 1 / 3, b: 1 / 3}
       for (let i = 0; i < data.length; i += 4) {
-        const ratio = {r: 0.3, g: 0.59, b: 0.11}
-        // const ratio = {r: 1 / 3, g: 1 / 3, b: 1 / 3}
         const gray = ratio.r * data[i] + ratio.g * data[i + 1] + ratio.b * data[i + 2]
         // const gray = Math.max(data[i], data[i + 1], data[i + 2])
         // const gray = Math.min(data[i], data[i + 1], data[i + 2])
@@ -246,7 +250,7 @@
 
     function decreaseSaturation () {
       const imageData = _getImageData()
-      const data = imageData.data
+      const {data} = imageData
       for (let i = 0; i < data.length; i += 4) {
         const color = tinycolor({
           r: data[i],
@@ -254,7 +258,7 @@
           b: data[i + 2]
         })
         const hsl = color.toHsl()
-        hsl.s -= hsl.s * 0.15
+        hsl.s -= hsl.s * .15
         const newColor = tinycolor(hsl)
         const newRgb = newColor.toRgb()
         data[i] = newRgb.r
@@ -266,7 +270,7 @@
 
     function increaseSaturation () {
       const imageData = _getImageData()
-      const data = imageData.data
+      const {data} = imageData
       for (let i = 0; i < data.length; i += 4) {
         const color = tinycolor({
           r: data[i],
@@ -274,7 +278,7 @@
           b: data[i + 2]
         })
         const hsl = color.toHsl()
-        hsl.s += (1 - hsl.s) * 0.15
+        hsl.s += (1 - hsl.s) * .15
         const newColor = tinycolor(hsl)
         const newRgb = newColor.toRgb()
         data[i] = newRgb.r
@@ -286,7 +290,7 @@
 
     function decreaseLightness () {
       const imageData = _getImageData()
-      const data = imageData.data
+      const {data} = imageData
       for (let i = 0; i < data.length; i += 4) {
         const color = tinycolor({
           r: data[i],
@@ -294,7 +298,7 @@
           b: data[i + 2]
         })
         const hsl = color.toHsl()
-        hsl.l -= hsl.l * 0.15
+        hsl.l -= hsl.l * .15
         const newColor = tinycolor(hsl)
         const newRgb = newColor.toRgb()
         data[i] = newRgb.r
@@ -306,7 +310,7 @@
 
     function increaseLightness () {
       const imageData = _getImageData()
-      const data = imageData.data
+      const {data} = imageData
       for (let i = 0; i < data.length; i += 4) {
         const color = tinycolor({
           r: data[i],
@@ -314,7 +318,7 @@
           b: data[i + 2],
         })
         const hsl = color.toHsl()
-        hsl.l += (1 - hsl.l) * 0.15
+        hsl.l += (1 - hsl.l) * .15
         const newColor = tinycolor(hsl)
         const newRgb = newColor.toRgb()
         data[i] = newRgb.r
@@ -330,7 +334,7 @@
       const distHeight = canvas.height
       const distImageData = ctx.createImageData(distWidth, distHeight)
       const blurRadius = 3
-      const weightArr = [[0.017720970363209305,0.018995329801383735,0.01980352229749583,0.0200804901539137,0.01980352229749583,0.018995329801383735,0.017720970363209305],[0.018995329801383735,0.020361331623941128,0.021227643270086926,0.021524528579932166,0.021227643270086926,0.020361331623941128,0.018995329801383735],[0.01980352229749583,0.021227643270086926,0.02213081379570627,0.022440330656681804,0.02213081379570627,0.021227643270086926,0.01980352229749583],[0.0200804901539137,0.021524528579932166,0.022440330656681804,0.022754176354730947,0.022440330656681804,0.021524528579932166,0.0200804901539137],[0.01980352229749583,0.021227643270086926,0.02213081379570627,0.022440330656681804,0.02213081379570627,0.021227643270086926,0.01980352229749583],[0.018995329801383735,0.020361331623941128,0.021227643270086926,0.021524528579932166,0.021227643270086926,0.020361331623941128,0.018995329801383735],[0.017720970363209305,0.018995329801383735,0.01980352229749583,0.0200804901539137,0.01980352229749583,0.018995329801383735,0.017720970363209305]]
+      const weightArr = [[.017720970363209305,.018995329801383735,.01980352229749583,.0200804901539137,.01980352229749583,.018995329801383735,.017720970363209305],[.018995329801383735,.020361331623941128,.021227643270086926,.021524528579932166,.021227643270086926,.020361331623941128,.018995329801383735],[.01980352229749583,.021227643270086926,.02213081379570627,.022440330656681804,.02213081379570627,.021227643270086926,.01980352229749583],[.0200804901539137,.021524528579932166,.022440330656681804,.022754176354730947,.022440330656681804,.021524528579932166,.0200804901539137],[.01980352229749583,.021227643270086926,.02213081379570627,.022440330656681804,.02213081379570627,.021227643270086926,.01980352229749583],[.018995329801383735,.020361331623941128,.021227643270086926,.021524528579932166,.021227643270086926,.020361331623941128,.018995329801383735],[.017720970363209305,.018995329801383735,.01980352229749583,.0200804901539137,.01980352229749583,.018995329801383735,.017720970363209305]]
       for (let i = 0; i < distHeight; i++) {
         for (let j = 0; j < distWidth; j++) {
           const index = (i * distWidth + j) * 4
