@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <title>Wave</title>
+  <link rel="stylesheet" href="libs/chart.min.css">
   <style>
     .block {margin: 10px 0;}
   </style>
@@ -11,12 +12,15 @@
   <div class="block">
     <input id="upload" type="file" accept="image/*">
   </div>
-  <canvas class="block" width="0" height="0"></canvas>
+  <canvas id="image" class="block" width="0" height="0"></canvas>
+  <canvas id="rowColors" class="block" width="3" height="1"></canvas>
+  <canvas id="columnColors" class="block" width="3" height="1"></canvas>
 
   <script src="libs/geometry-utils.js"></script>
   <script src="libs/jquery.min.js"></script>
+  <script src="libs/chart.min.js"></script>
   <script>
-    const $canvas = $('canvas')
+    const $canvas = $('#image')
     const canvas = $canvas.get(0)
     const ctx = canvas.getContext('2d')
     const rowColors = {red: [], green: [], blue: []}
@@ -24,6 +28,8 @@
     let fileName
     let initialImageData
     let tempImageData
+    let rowColorsChart
+    let columnColorsChart
 
     $('#upload').on('change', function (e) {
       fileName = this.files[0].name
@@ -33,6 +39,7 @@
         ctx.drawImage(this, 0, 0)
         initialImageData = _getInitialImageData()
         tempImageData = _getTempImageData()
+        initCharts()
       }
       image.src = URL.createObjectURL(this.files[0])
     })
@@ -66,6 +73,12 @@
       const row = GeometryUtils.clamp(0, height - 1, e.offsetY)
       const column = GeometryUtils.clamp(0, width - 1, e.offsetX)
       const highlightAmount = .7
+      rowColors.red = []
+      rowColors.green = []
+      rowColors.blue = []
+      columnColors.red = []
+      columnColors.green = []
+      columnColors.blue = []
       for (let i = row * width; i < (row + 1) * width; i++) {
         const index = i * 4
         rowColors.red.push(data[index])
@@ -87,6 +100,7 @@
       ctx.putImageData(imageData, 0, 0)
       tempImageData = null
       tempImageData = _getTempImageData()
+      updateChartsData()
     })
 
     $canvas.on('mousemove', function (e) {
@@ -113,6 +127,61 @@
     $canvas.on('mouseleave', function (e) {
       _getTempImageData()
     })
+
+    function initCharts () {
+      const {width, height} = _getInitialImageData()
+      const rowColorsCtx = $('#rowColors')
+      const columnColorsCtx = $('#columnColors')
+      const rowOptions = {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: []
+        },
+        options: {}
+      }
+      const columnOptions = GeometryUtils.clone(rowOptions)
+      for (let i = 0; i < width; i++) {
+        rowOptions.data.labels.push(String(i))
+      }
+      for (let i = 0; i < height; i++) {
+        columnOptions.data.labels.push(String(i))
+      }
+      rowColorsChart = new Chart(rowColorsCtx, rowOptions)
+      columnColorsChart = new Chart(columnColorsCtx, columnOptions)
+    }
+
+    function updateChartsData () {
+      rowColorsChart.data.datasets = []
+      columnColorsChart.data.datasets = []
+      const borderColorMap = {
+        red: 'rgb(255, 51, 51)',
+        green: 'rgb(51, 255, 51)',
+        blue: 'rgb(51, 51, 255)'
+      }
+      const backgroundColorMap = {
+        red: 'rgba(255, 51, 51, .15)',
+        green: 'rgba(51, 255, 51, .15)',
+        blue: 'rgba(51, 51, 255, .15)'
+      }
+      new Array(
+        [rowColors, rowColorsChart],
+        [columnColors, columnColorsChart]
+      ).forEach(([colors, colorsChart]) => {
+        Object.keys(colors).forEach(color => {
+          colorsChart.data.datasets.push({
+            label: color,
+            data: colors[color],
+            pointRadius: 0,
+            borderWidth: 2,
+            borderColor: borderColorMap[color],
+            backgroundColor: backgroundColorMap[color]
+          })
+        })
+      })
+      rowColorsChart.update()
+      columnColorsChart.update()
+    }
   </script>
 </body>
 </html>
