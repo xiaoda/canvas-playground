@@ -21,11 +21,14 @@ const GeometryUtils = {
     return !!smallerCount && !!biggerCount &&
            (smallerCount % 2 === 1 || biggerCount % 2 === 1)
   },
-  mix (a, b, ratio) {
-    return a * (1 - ratio) + b * ratio
-  },
   clamp (min, max, x) {
     return Math.min(Math.max(x, min), max)
+  },
+  changeByPercent (current, target, percent) {
+    return current + (target - current) * percent
+  },
+  mix (a, b, ratio) {
+    return a * (1 - ratio) + b * ratio
   },
   formatRadian (radian) {
     while (Math.abs(radian) > Math.PI) {

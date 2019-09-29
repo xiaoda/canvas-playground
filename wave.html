@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Wave</title>
+  <style>
+    .block {margin: 10px 0;}
+  </style>
+</head>
+<body>
+  <div class="block">
+    <input id="upload" type="file" accept="image/*">
+  </div>
+  <canvas class="block" width="0" height="0"></canvas>
+
+  <script src="libs/geometry-utils.js"></script>
+  <script src="libs/jquery.min.js"></script>
+  <script>
+    const $canvas = $('canvas')
+    const canvas = $canvas.get(0)
+    const ctx = canvas.getContext('2d')
+    const rowColors = {red: [], green: [], blue: []}
+    const columnColors = {red: [], green: [], blue: []}
+    let fileName
+    let initialImageData
+    let tempImageData
+
+    $('#upload').on('change', function (e) {
+      fileName = this.files[0].name
+      const image = new Image()
+      image.onload = function () {
+        _adjustCanvasSize(this.width, this.height)
+        ctx.drawImage(this, 0, 0)
+        initialImageData = _getInitialImageData()
+        tempImageData = _getTempImageData()
+      }
+      image.src = URL.createObjectURL(this.files[0])
+    })
+
+    function _adjustCanvasSize (width, height) {
+      canvas.width = canvas.style.width = width
+      canvas.height = canvas.style.height = height
+    }
+
+    function _getTempImageData (
+      sx = 0, sy = 0,
+      sw = canvas.width,
+      sh = canvas.height
+    ) {
+      if (tempImageData) ctx.putImageData(tempImageData, 0, 0)
+      return ctx.getImageData(sx, sy, sw, sh)
+    }
+
+    function _getInitialImageData (
+      sx = 0, sy = 0,
+      sw = canvas.width,
+      sh = canvas.height
+    ) {
+      if (initialImageData) ctx.putImageData(initialImageData, 0, 0)
+      return ctx.getImageData(sx, sy, sw, sh)
+    }
+
+    $canvas.on('click', function (e) {
+      const imageData = _getInitialImageData()
+      const {width, height, data} = imageData
+      const row = GeometryUtils.clamp(0, height - 1, e.offsetY)
+      const column = GeometryUtils.clamp(0, width - 1, e.offsetX)
+      const highlightAmount = .7
+      for (let i = row * width; i < (row + 1) * width; i++) {
+        const index = i * 4
+        rowColors.red.push(data[index])
+        rowColors.green.push(data[index + 1])
+        rowColors.blue.push(data[index + 2])
+        data[index] = GeometryUtils.changeByPercent(data[index], 255, highlightAmount)
+        data[index + 1] = GeometryUtils.changeByPercent(data[index + 1], 255, highlightAmount)
+        data[index + 2] = GeometryUtils.changeByPercent(data[index + 2], 255, highlightAmount)
+      }
+      for (let i = column; i < width * height; i += width) {
+        const index = i * 4
+        columnColors.red.push(data[index])
+        columnColors.green.push(data[index + 1])
+        columnColors.blue.push(data[index + 2])
+        data[index] = GeometryUtils.changeByPercent(data[index], 255, highlightAmount)
+        data[index + 1] = GeometryUtils.changeByPercent(data[index + 1], 255, highlightAmount)
+        data[index + 2] = GeometryUtils.changeByPercent(data[index + 2], 255, highlightAmount)
+      }
+      ctx.putImageData(imageData, 0, 0)
+      tempImageData = null
+      tempImageData = _getTempImageData()
+    })
+
+    $canvas.on('mousemove', function (e) {
+      const imageData = _getTempImageData()
+      const {width, height, data} = imageData
+      const row = GeometryUtils.clamp(0, height - 1, e.offsetY)
+      const column = GeometryUtils.clamp(0, width - 1, e.offsetX)
+      const hightlightColor = [255, 102, 0]
+      for (let i = row * width; i < (row + 1) * width; i++) {
+        const index = i * 4
+        data[index] = hightlightColor[0]
+        data[index + 1] = hightlightColor[1]
+        data[index + 2] = hightlightColor[2]
+      }
+      for (let i = column; i < width * height; i += width) {
+        const index = i * 4
+        data[index] = hightlightColor[0]
+        data[index + 1] = hightlightColor[1]
+        data[index + 2] = hightlightColor[2]
+      }
+      ctx.putImageData(imageData, 0, 0)
+    })
+
+    $canvas.on('mouseleave', function (e) {
+      _getTempImageData()
+    })
+  </script>
+</body>
+</html>
