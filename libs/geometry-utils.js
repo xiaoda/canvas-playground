@@ -33,11 +33,43 @@ const GeometryUtils = {
   mix (a, b, ratio) {
     return a * (1 - ratio) + b * ratio
   },
+  map (a, b, x) {
+    return x / a * b
+  },
   formatRadian (radian) {
     while (Math.abs(radian) > Math.PI) {
       radian += Math.PI * 2 * (radian / Math.abs(radian)) * -1
     }
     return radian
+  },
+  debounce (func, interval) {
+    let timeoutHandler
+    return function () {
+      const _this = this
+      const _args = arguments
+      clearTimeout(timeoutHandler)
+      timeoutHandler = setTimeout(function () {
+        func.apply(_this, _args)
+      }, interval)
+    }
+  },
+  throttle (func, interval) {
+    let lastTime, timeoutHandler
+    return function (args) {
+      const _this = this
+      const _args = arguments
+      let now = +new Date()
+      if (lastTime && now < lastTime + interval) {
+        clearTimeout(timeoutHandler)
+        timeoutHandler = setTimeout(function () {
+          lastTime = now
+          func.apply(_this, _args)
+        }, interval)
+      }else {
+        lastTime = now
+        func.apply(_this,_args)
+      }
+    }
   },
 
   /**
@@ -297,6 +329,4 @@ const GeometryUtils = {
   }
 }
 
-try {
-  module.exports = GeometryUtils
-} catch (e) {}
+if (typeof module !== 'undefined') module.exports = GeometryUtils
