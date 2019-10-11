@@ -26,7 +26,7 @@
     const rowColors = {red: [], green: [], blue: []}
     const columnColors = {red: [], green: [], blue: []}
     const highlightColorArr = [255, 102, 0]
-    const highlightColorRgb = 'rgba(0, 0, 0, 0.4)'
+    const highlightColorRgb = 'rgba(0, 0, 0, 0.5)'
     const slowlyUpdateChartsCurrent = GeometryUtils.throttle(updateChartsCurrent, 50)
     let fileName
     let initialImageData
@@ -87,15 +87,21 @@
         rowColors.red.push(data[index])
         rowColors.green.push(data[index + 1])
         rowColors.blue.push(data[index + 2])
-        data[index] = GeometryUtils.changeByPercent(data[index], 255, highlightAmount)
-        data[index + 1] = GeometryUtils.changeByPercent(data[index + 1], 255, highlightAmount)
-        data[index + 2] = GeometryUtils.changeByPercent(data[index + 2], 255, highlightAmount)
       }
       for (let i = column; i < width * height; i += width) {
         const index = i * 4
         columnColors.red.push(data[index])
         columnColors.green.push(data[index + 1])
         columnColors.blue.push(data[index + 2])
+      }
+      for (let i = row * width; i < (row + 1) * width; i++) {
+        const index = i * 4
+        data[index] = GeometryUtils.changeByPercent(data[index], 255, highlightAmount)
+        data[index + 1] = GeometryUtils.changeByPercent(data[index + 1], 255, highlightAmount)
+        data[index + 2] = GeometryUtils.changeByPercent(data[index + 2], 255, highlightAmount)
+      }
+      for (let i = column; i < width * height; i += width) {
+        const index = i * 4
         data[index] = GeometryUtils.changeByPercent(data[index], 255, highlightAmount)
         data[index + 1] = GeometryUtils.changeByPercent(data[index + 1], 255, highlightAmount)
         data[index + 2] = GeometryUtils.changeByPercent(data[index + 2], 255, highlightAmount)
