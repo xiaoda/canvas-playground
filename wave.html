@@ -25,9 +25,7 @@
     const ctx = canvas.getContext('2d')
     const rowColors = {red: [], green: [], blue: []}
     const columnColors = {red: [], green: [], blue: []}
-    const highlightColorArr = [255, 102, 0]
-    const highlightColorRgb = 'rgba(0, 0, 0, 0.5)'
-    const slowlyUpdateChartsCurrent = GeometryUtils.throttle(updateChartsCurrent, 50)
+    const slowlyUpdateChartsDynamic = GeometryUtils.throttle(updateChartsDynamic, 50)
     let fileName
     let initialImageData
     let tempImageData
@@ -70,6 +68,10 @@
       return ctx.getImageData(sx, sy, sw, sh)
     }
 
+    function _capitalize (str) {
+      return `${str[0].toUpperCase()}${str.slice(1)}`
+    }
+
     $canvas.on('click', function (e) {
       const imageData = _getInitialImageData()
       const {width, height, data} = imageData
@@ -110,7 +112,8 @@
       tempImageData = null
       tempImageData = _getTempImageData()
       updateChartsData()
-      slowlyUpdateChartsCurrent(row, column)
+      updateChartsStatic(row, column)
+      slowlyUpdateChartsDynamic(row, column)
     })
 
     $canvas.on('mousemove', function (e) {
@@ -118,24 +121,26 @@
       const {width, height, data} = imageData
       const row = GeometryUtils.clamp(0, height - 1, e.offsetY)
       const column = GeometryUtils.clamp(0, width - 1, e.offsetX)
+      const highlightColor = [255, 102, 0]
       for (let i = row * width; i < (row + 1) * width; i++) {
         const index = i * 4
-        data[index] = highlightColorArr[0]
-        data[index + 1] = highlightColorArr[1]
-        data[index + 2] = highlightColorArr[2]
+        data[index] = highlightColor[0]
+        data[index + 1] = highlightColor[1]
+        data[index + 2] = highlightColor[2]
       }
       for (let i = column; i < width * height; i += width) {
         const index = i * 4
-        data[index] = highlightColorArr[0]
-        data[index + 1] = highlightColorArr[1]
-        data[index + 2] = highlightColorArr[2]
+        data[index] = highlightColor[0]
+        data[index + 1] = highlightColor[1]
+        data[index + 2] = highlightColor[2]
       }
       ctx.putImageData(imageData, 0, 0)
-      slowlyUpdateChartsCurrent(row, column)
+      slowlyUpdateChartsDynamic(row, column)
     })
 
     $canvas.on('mouseleave', function (e) {
       _getTempImageData()
+      clearChartsDynamic()
     })
 
     function initCharts () {
@@ -195,7 +200,7 @@
       ).forEach(([colors, colorsChart]) => {
         Object.keys(colors).forEach(color => {
           colorsChart.data.datasets.push({
-            label: color,
+            label: _capitalize(color),
             data: colors[color],
             pointRadius: 0,
             borderWidth: 2,
@@ -208,12 +213,9 @@
       rowColorsChart.update()
       columnColorsChart.update()
     }
-    function updateChartsCurrent (row, column) {
-      if (!rowColorsChart.data.datasets.length) return
-      if (rowColorsChart.data.datasets.length > 3) {
-        rowColorsChart.data.datasets.shift()
-        columnColorsChart.data.datasets.shift()
-      }
+
+    function updateChartsStatic (row, column) {
+      const highlightColor = 'rgba(0, 0, 0, 0.9)'
       Array(
         [rowColorsChart, column],
         [columnColorsChart, row]
@@ -221,14 +223,61 @@
         const data = Array(chart.data.datasets[0].data.length).fill(0)
         data[position] = 255
         chart.data.datasets.unshift({
-          label: 'current',
+          label: 'Static',
           data,
-          backgroundColor: highlightColorRgb,
+          backgroundColor: highlightColor,
+          borderWidth: 0
+        })
+      })
+      rowColorsChart.update()
+      columnColorsChart.update()
+    }
+
+    function updateChartsDynamic (row, column) {
+      if (!rowColorsChart.data.datasets.length) return
+      if (rowColorsChart.data.datasets.length > 4) {
+        rowColorsChart.data.datasets.shift()
+        columnColorsChart.data.datasets.shift()
+      }
+      const highlightColor = 'rgba(0, 0, 0, 0.5)'
+      Array(
+        [rowColorsChart, column],
+        [columnColorsChart, row]
+      ).forEach(([chart, position]) => {
+        const data = Array(chart.data.datasets[0].data.length).fill(0)
+        data[position] = 255
+        chart.data.datasets.unshift({
+          label: 'Active',
+          data,
+          backgroundColor: highlightColor,
           borderWidth: 0,
         })
       })
       rowColorsChart.update()
       columnColorsChart.update()
+    }
+
+    function clearChartsDynamic () {
+      setTimeout(_ => {
+        if (rowColorsChart.data.datasets.length > 4) {
+          rowColorsChart.data.datasets.shift()
+          columnColorsChart.data.datasets.shift()
+        }
+        const highlightColor = 'rgba(0, 0, 0, 0.5)'
+        Array(
+          rowColorsChart, columnColorsChart
+        ).forEach(chart => {
+          const data = Array(chart.data.datasets[0].data.length).fill(0)
+          chart.data.datasets.unshift({
+            label: 'Active',
+            data,
+            backgroundColor: highlightColor,
+            borderWidth: 0,
+          })
+        })
+        rowColorsChart.update()
+        columnColorsChart.update()
+      }, 50)
     }
   </script>
 </body>
