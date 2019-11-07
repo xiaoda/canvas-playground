@@ -258,6 +258,7 @@
     }
 
     function clearChartsDynamic () {
+      if (!rowColorsChart.data.datasets.length) return
       setTimeout(_ => {
         if (rowColorsChart.data.datasets.length > 4) {
           rowColorsChart.data.datasets.shift()
