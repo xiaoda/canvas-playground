@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Image Wave Charts</title>
+  <link rel="stylesheet" href="/libs/chart.min.css">
+  <style>
+    body {font-family: PingFangSC-Light;}
+    .block {margin: 10px 0;}
+  </style>
+</head>
+<body>
+  <canvas id="rowColors" class="block" width="3" height="1"></canvas>
+  <canvas id="columnColors" class="block" width="3" height="1"></canvas>
+
+  <script src="/libs/geometry-utils.js"></script>
+  <script src="/libs/jquery.min.js"></script>
+  <script src="/libs/chart.min.js"></script>
+  <script>
+    const channel = new BroadcastChannel('image-wave')
+
+    $(window).on('load', function () {
+      channel.postMessage({
+        status: 'load'
+      })
+    })
+
+    $(window).on('unload', function () {
+      channel.postMessage({
+        status: 'unload'
+      })
+    })
+
+    channel.onmessage = function (event) {
+      const data = event.data
+      console.info('message', data)
+      switch (data.status) {
+        case 'init':
+          initCharts(
+            data.imageSize.width,
+            data.imageSize.height
+          )
+          break
+      }
+    }
+
+    function initCharts (width, height) {
+      const rowColorsCtx = $('#rowColors')
+      const columnColorsCtx = $('#columnColors')
+      const rowOptions = {
+        type: 'bar',
+        data: {
+          labels: [],
+          datasets: []
+        },
+        options: {
+          title: {
+            display: true,
+            text: 'Row Wave'
+          },
+          scales: {
+            xAxes: [{
+              barThickness: 1
+            }],
+            yAxes: [{
+              ticks: {
+                max: 255,
+                stepSize: 51
+              }
+            }]
+          },
+          animation: {duration: 0},
+          hover: {animationDuration: 0},
+          responsiveAnimationDuration: 0
+        }
+      }
+      const columnOptions = GeometryUtils.clone(rowOptions)
+      columnOptions.options.title.text = 'Column Wave'
+      for (let i = 0; i < width; i++) {
+        rowOptions.data.labels.push(String(i))
+      }
+      for (let i = 0; i < height; i++) {
+        columnOptions.data.labels.push(String(i))
+      }
+      rowColorsChart = new Chart(rowColorsCtx, rowOptions)
+      columnColorsChart = new Chart(columnColorsCtx, columnOptions)
+    }
+  </script>
+</body>
+</html>

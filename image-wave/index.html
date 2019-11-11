@@ -3,8 +3,9 @@
 <head>
   <meta charset="utf-8">
   <title>Image Wave</title>
-  <link rel="stylesheet" href="libs/chart.min.css">
+  <link rel="stylesheet" href="/libs/chart.min.css">
   <style>
+    body {font-family: PingFangSC-Light;}
     .block {margin: 10px 0;}
   </style>
 </head>
@@ -12,13 +13,16 @@
   <div class="block">
     <input id="upload" type="file" accept="image/*">
   </div>
+  <div class="block">
+    <button id="toggleChartsWindow">Open Charts Window</button>
+  </div>
   <canvas id="image" class="block" width="0" height="0"></canvas>
   <canvas id="rowColors" class="block" width="3" height="1"></canvas>
   <canvas id="columnColors" class="block" width="3" height="1"></canvas>
 
-  <script src="libs/geometry-utils.js"></script>
-  <script src="libs/jquery.min.js"></script>
-  <script src="libs/chart.min.js"></script>
+  <script src="/libs/geometry-utils.js"></script>
+  <script src="/libs/jquery.min.js"></script>
+  <script src="/libs/chart.min.js"></script>
   <script>
     /* Constants */
     const $canvas = $('#image')
@@ -30,6 +34,8 @@
     const slowlyUpdateChartsDynamic = GeometryUtils.throttle(
       updateChartsDynamic, throttleInterval
     )
+    const channel = new BroadcastChannel('image-wave')
+    const reloadTime = 500
 
     /* Variables */
     let fileName
@@ -37,18 +43,31 @@
     let tempImageData
     let rowColorsChart
     let columnColorsChart
+    let chartsWindow
+    let reloadTimeout
 
-    $('#upload').on('change', function (e) {
+    $('#upload').on('change', function () {
       fileName = this.files[0].name
       const image = new Image()
-      image.onload = function () {
+      $(image).on('load', function () {
         _adjustCanvasSize(this.width, this.height)
         ctx.drawImage(this, 0, 0)
         initialImageData = _getInitialImageData()
         tempImageData = _getTempImageData()
         initCharts()
-      }
+        postInitMessage()
+      })
       image.src = URL.createObjectURL(this.files[0])
+    })
+
+    $('#toggleChartsWindow').on('click', function () {
+      if (chartsWindow) {
+        chartsWindow.close()
+      } else {
+        chartsWindow = window.open(`./charts.html?${+new Date()}`)
+        $(this).text('Close Charts Window')
+        $('#rowColors, #columnColors').hide()
+      }
     })
 
     function _adjustCanvasSize (width, height) {
@@ -78,11 +97,11 @@
       return `${str[0].toUpperCase()}${str.slice(1)}`
     }
 
-    $canvas.on('click', function (e) {
+    $canvas.on('click', function (event) {
       const imageData = _getInitialImageData()
       const {width, height, data} = imageData
-      const row = GeometryUtils.clamp(0, height - 1, e.offsetY)
-      const column = GeometryUtils.clamp(0, width - 1, e.offsetX)
+      const row = GeometryUtils.clamp(0, height - 1, event.offsetY)
+      const column = GeometryUtils.clamp(0, width - 1, event.offsetX)
       const highlightAmount = .7
       rowColors.red = []
       rowColors.green = []
@@ -91,7 +110,7 @@
       columnColors.green = []
       columnColors.blue = []
 
-      /* Store row color data */
+      /* Store row color wave */
       for (let i = row * width; i < (row + 1) * width; i++) {
         const index = i * 4
         rowColors.red.push(data[index])
@@ -99,7 +118,7 @@
         rowColors.blue.push(data[index + 2])
       }
 
-      /* Store column color data */
+      /* Store column color wave */
       for (let i = column; i < width * height; i += width) {
         const index = i * 4
         columnColors.red.push(data[index])
@@ -130,11 +149,11 @@
       slowlyUpdateChartsDynamic(row, column)
     })
 
-    $canvas.on('mousemove', function (e) {
+    $canvas.on('mousemove', function (event) {
       const imageData = _getTempImageData()
       const {width, height, data} = imageData
-      const row = GeometryUtils.clamp(0, height - 1, e.offsetY)
-      const column = GeometryUtils.clamp(0, width - 1, e.offsetX)
+      const row = GeometryUtils.clamp(0, height - 1, event.offsetY)
+      const column = GeometryUtils.clamp(0, width - 1, event.offsetX)
       const highlightColor = [255, 102, 0]
 
       /* Highlight row pixels */
@@ -156,7 +175,7 @@
       slowlyUpdateChartsDynamic(row, column)
     })
 
-    $canvas.on('mouseleave', function (e) {
+    $canvas.on('mouseleave', function () {
       _getTempImageData()
       clearChartsDynamic()
     })
@@ -172,6 +191,10 @@
           datasets: []
         },
         options: {
+          title: {
+            display: true,
+            text: 'Row Wave'
+          },
           scales: {
             xAxes: [{
               barThickness: 1
@@ -189,6 +212,7 @@
         }
       }
       const columnOptions = GeometryUtils.clone(rowOptions)
+      columnOptions.options.title.text = 'Column Wave'
       for (let i = 0; i < width; i++) {
         rowOptions.data.labels.push(String(i))
       }
@@ -199,7 +223,7 @@
       columnColorsChart = new Chart(columnColorsCtx, columnOptions)
     }
 
-    /* Update color data chart */
+    /* Update color wave chart */
     function updateChartsData () {
       rowColorsChart.data.datasets = []
       columnColorsChart.data.datasets = []
@@ -233,9 +257,9 @@
       columnColorsChart.update()
     }
 
-    /* Update clicked position data on chart */
+    /* Update clicked position wave on chart */
     function updateChartsStatic (row, column) {
-      const highlightColor = 'rgba(0, 0, 0, .8)'
+      const highlightColor = 'rgba(0, 0, 0, .7)'
       Array(
         [rowColorsChart, column],
         [columnColorsChart, row]
@@ -253,7 +277,7 @@
       columnColorsChart.update()
     }
 
-    /* Update hover position data on chart */
+    /* Update hover position wave on chart */
     function updateChartsDynamic (row, column) {
       if (!rowColorsChart.data.datasets.length) return
       if (rowColorsChart.data.datasets.length > 4) {
@@ -278,7 +302,7 @@
       columnColorsChart.update()
     }
 
-    /* Clear hover position data on chart */
+    /* Clear hover position wave on chart */
     function clearChartsDynamic () {
       if (!rowColorsChart.data.datasets.length) return
       setTimeout(_ => {
@@ -301,6 +325,35 @@
         rowColorsChart.update()
         columnColorsChart.update()
       }, throttleInterval)
+    }
+
+    channel.onmessage = function (event) {
+      const data = event.data
+      console.info('message', data)
+      switch (data.status) {
+        case 'load':
+          clearTimeout(reloadTimeout)
+          postInitMessage()
+          break
+        case 'unload':
+          reloadTimeout = setTimeout(_ => {
+            chartsWindow = null
+            $('#rowColors, #columnColors').show()
+            $('#toggleChartsWindow').text('Open Charts Window')
+          }, reloadTime)
+          break
+      }
+    }
+
+    function postInitMessage () {
+      if (!initialImageData) return
+      channel.postMessage({
+        status: 'init',
+        imageSize: {
+          width: canvas.width,
+          height: canvas.height
+        }
+      })
     }
   </script>
 </body>
