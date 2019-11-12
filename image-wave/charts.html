@@ -16,8 +16,17 @@
   <script src="/libs/geometry-utils.js"></script>
   <script src="/libs/jquery.min.js"></script>
   <script src="/libs/chart.min.js"></script>
+  <script src="charts.js"></script>
   <script>
+    /* Constants */
     const channel = new BroadcastChannel('image-wave')
+    const throttleInterval = 50
+
+    /* Variables */
+    let rowColors
+    let columnColors
+    let rowColorsChart
+    let columnColorsChart
 
     $(window).on('load', function () {
       channel.postMessage({
@@ -35,55 +44,41 @@
       const data = event.data
       console.info('message', data)
       switch (data.status) {
+        case 'check':
+          channel.postMessage({
+            status: 'confirm'
+          })
+          break
+
         case 'init':
-          initCharts(
-            data.imageSize.width,
-            data.imageSize.height
-          )
+          initCharts(data.width, data.height)
+          break
+
+        case 'colors':
+          rowColors = data.rowColors
+          columnColors = data.columnColors
+          break
+
+        case 'update':
+          updateChartsData()
+          break
+
+        case 'updateStatic':
+          updateChartsStatic(data.row, data.column)
+          break
+
+        case 'updateDynamic':
+          updateChartsDynamic(data.row, data.column)
+          break
+
+        case 'clearDynamic':
+          clearChartsDynamic()
+          break
+
+        case 'close':
+          destroyCharts()
           break
       }
-    }
-
-    function initCharts (width, height) {
-      const rowColorsCtx = $('#rowColors')
-      const columnColorsCtx = $('#columnColors')
-      const rowOptions = {
-        type: 'bar',
-        data: {
-          labels: [],
-          datasets: []
-        },
-        options: {
-          title: {
-            display: true,
-            text: 'Row Wave'
-          },
-          scales: {
-            xAxes: [{
-              barThickness: 1
-            }],
-            yAxes: [{
-              ticks: {
-                max: 255,
-                stepSize: 51
-              }
-            }]
-          },
-          animation: {duration: 0},
-          hover: {animationDuration: 0},
-          responsiveAnimationDuration: 0
-        }
-      }
-      const columnOptions = GeometryUtils.clone(rowOptions)
-      columnOptions.options.title.text = 'Column Wave'
-      for (let i = 0; i < width; i++) {
-        rowOptions.data.labels.push(String(i))
-      }
-      for (let i = 0; i < height; i++) {
-        columnOptions.data.labels.push(String(i))
-      }
-      rowColorsChart = new Chart(rowColorsCtx, rowOptions)
-      columnColorsChart = new Chart(columnColorsCtx, columnOptions)
     }
   </script>
 </body>
