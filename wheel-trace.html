@@ -242,9 +242,7 @@
     /* 页面 */
     $('[data-action]').on('click', function () {
       const action = $(this).data('action')
-      try {
-        window[action]()
-      } catch (e) {}
+      window[action]()
     })
   </script>
 </body>
