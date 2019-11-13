@@ -52,8 +52,8 @@ function initCharts (width, height) {
 function destroyCharts () {
   rowColorsChart = columnColorsChart = null
   $('#rowColors, #columnColors').attr({
-    width: 3,
-    height: 1
+    width: 5,
+    height: 2
   })
 }
 
