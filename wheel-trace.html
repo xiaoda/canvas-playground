@@ -20,21 +20,23 @@
   <script src="/libs/geometry-utils.js"></script>
   <script src="/libs/jquery.min.js"></script>
   <script>
-    /* 常量 */
+    /* Constants */
     const canvas = $('canvas').get(0)
-    canvas.width = canvas.height = 600
     const ctx = canvas.getContext('2d')
     const midpoint = [canvas.width * .5, canvas.height * .5]
     const wheelDistance = 100
     const wheelSpacing = 60
     const interval = 10
     const step = 1
+
+    /* Variables */
     let direction
     let steeringRadian
     let correction
     let wheelMoveTimeout
 
-    /* 车轮类 */
+    canvas.width = canvas.height = 600
+
     class Wheel {
       constructor (options = {}) {
         this.options = {...options}
@@ -57,7 +59,6 @@
       }
     }
 
-    /* 轴类 */
     class Axle {
       constructor (options = {}) {
         this.options = {...options}
@@ -79,7 +80,7 @@
       }
     }
 
-    /* 实例 */
+    /* Instances */
     const frontWheelOriginalPosition = midpoint
     const distalFrontWheelOriginalPosition = GeometryUtils.getPointByOffset(
       midpoint, {
@@ -142,7 +143,7 @@
       strokeStyle: '#666'
     })
 
-    /* 过程 */
+    /* Process */
     function _transformCoordinate (position) {
       return [position[0], canvas.height - position[1]]
     }
@@ -240,7 +241,7 @@
       window.location.reload()
     }
 
-    /* 页面 */
+    /* Page */
     $('[data-action]').on('click', function () {
       const action = $(this).data('action')
       window[action]()
