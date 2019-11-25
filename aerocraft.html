@@ -29,13 +29,13 @@
         this.weight = options.weight || 1
         this.position = options.position || [0, 0]
         this.acceleration = 0
-        this.aDirection = 0
+        this.aRadian = 0
         this.velocity = 0
-        this.vDirection = 0
+        this.vRadian = 0
       }
       applyForce (force) {
         const acceleration = force.quantity / this.weight
-        const aDirection = force.direction
+        const aRadian = force.radian
         // todo
       }
     }
@@ -43,7 +43,7 @@
     class Force {
       constructor (options = {}) {
         this.quantity = options.quantity || 0
-        this.direction = options.direction || 0
+        this.radian = options.radian || 0
       }
     }
 
@@ -72,6 +72,7 @@
     const force = new Force({
       quantity: 1
     })
+    aerocraft.applyForce(force)
 
     window.requestAnimationFrame(draw)
   </script>
