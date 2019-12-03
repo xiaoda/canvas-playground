@@ -16,36 +16,15 @@
 
   <script src="/libs/geometry-utils.js"></script>
   <script src="/libs/jquery.min.js"></script>
-  <script>
+  <script type="module">
+    import Aerocraft from './aerocraft.js'
+    import Force from './force.js'
+
     /* Constants */
     const canvas = $('canvas').get(0)
     const ctx = canvas.getContext('2d')
 
     canvas.width = canvas.height = 600
-
-    class Aerocraft {
-      constructor (options = {}) {
-        this.radius = options.radius || 10
-        this.weight = options.weight || 1
-        this.position = options.position || [0, 0]
-        this.acceleration = 0
-        this.aRadian = 0
-        this.velocity = 0
-        this.vRadian = 0
-      }
-      applyForce (force) {
-        const acceleration = force.quantity / this.weight
-        const aRadian = force.radian
-        // todo
-      }
-    }
-
-    class Force {
-      constructor (options = {}) {
-        this.quantity = options.quantity || 0
-        this.radian = options.radian || 0
-      }
-    }
 
     function draw () {
       ctx.clearRect(0, 0, canvas.width, canvas.height)

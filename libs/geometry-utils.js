@@ -42,6 +42,20 @@ const GeometryUtils = {
     }
     return radian
   },
+  linearChange (initial, target, duration, callback, precision = 0) {
+    const startTimestamp = +new Date()
+    const intervalID = setInterval(_ => {
+      const timestamp = +new Date()
+      const timePassed = timestamp - startTimestamp
+      if (timePassed > duration) {
+        clearInterval(intervalID)
+        return
+      }
+      const current = initial + (target - initial) * (timePassed / duration)
+      callback(current)
+    }, precision)
+    return intervalID
+  },
   debounce (fun, interval) {
     let timeoutHandler
     return function () {
@@ -70,6 +84,27 @@ const GeometryUtils = {
         fun.apply(_this,_args)
       }
     }
+  },
+  setTimeoutCustom (callback, delay, precision = 0) {
+    const startTimestamp = +new Date()
+    const intervalID = setInterval(_ => {
+      const timestamp = +new Date()
+      if (timestamp - startTimestamp >= delay) {
+        clearInterval(intervalID)
+        callback()
+      }
+    }, precision)
+    return intervalID
+  },
+  setIntervalCustom (callback, delay, precision = 0) {
+    let startTimestamp = +new Date()
+    return setInterval(_ => {
+      const timestamp = +new Date()
+      if (timestamp - startTimestamp >= delay) {
+        startTimestamp = timestamp
+        callback()
+      }
+    }, precision)
   },
   chain (data, ...args) {
     args.forEach(arg => {

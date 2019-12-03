@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Wheel Trace</title>
+  <title>Wheel Track</title>
   <style>
     canvas {
       display: block;
@@ -19,11 +19,12 @@
 
   <script src="/libs/geometry-utils.js"></script>
   <script src="/libs/jquery.min.js"></script>
-  <script>
+  <script type="module">
+    import Wheel from './wheel.js'
+    import Axle from './axle.js'
+
     /* Constants */
     const canvas = $('canvas').get(0)
-    const ctx = canvas.getContext('2d')
-    const midpoint = [canvas.width * .5, canvas.height * .5]
     const wheelDistance = 100
     const wheelSpacing = 60
     const interval = 10
@@ -36,49 +37,8 @@
     let wheelMoveTimeout
 
     canvas.width = canvas.height = 600
-
-    class Wheel {
-      constructor (options = {}) {
-        this.options = {...options}
-        this.positions = []
-        this.setPosition(options.position)
-      }
-      setPosition (position = midpoint) {
-        this.position = position
-        this.positions.push(this.position)
-        this.draw()
-      }
-      draw () {
-        ctx.fillStyle = this.options.fillStyle
-        this.positions.forEach(position => {
-          ctx.beginPath()
-          ctx.arc(...position, 1, 0, Math.PI * 2)
-          ctx.closePath()
-          ctx.fill()
-        })
-      }
-    }
-
-    class Axle {
-      constructor (options = {}) {
-        this.options = {...options}
-        this.setPositions(...options.positions)
-      }
-      setPositions (frontWheelPosition, rearWheelPosition) {
-        this.positions = [frontWheelPosition, rearWheelPosition]
-        this.draw()
-      }
-      draw () {
-        ctx.lineWidth = 2
-        ctx.strokeStyle = this.options.strokeStyle
-        ctx.setLineDash([])
-        ctx.beginPath()
-        ctx.moveTo(...this.positions[0])
-        ctx.lineTo(...this.positions[1])
-        ctx.closePath()
-        ctx.stroke()
-      }
-    }
+    const midpoint = [canvas.width * .5, canvas.height * .5]
+    window.ctx = canvas.getContext('2d')
 
     /* Instances */
     const frontWheelOriginalPosition = midpoint
@@ -161,7 +121,7 @@
     }
     function wheelMove () {
       const frontWheelRadian = GeometryUtils.getRadianFromXAxis(
-        GeometryUtils.getVector(
+        GeometryUtils.getDirection(
           _transformCoordinate(rearWheel.position),
           _transformCoordinate(frontWheel.position)
         )
@@ -171,28 +131,28 @@
         frontWheelRadian,
         step
       )
-      const rearWheelVector = direction === 'forward' ? GeometryUtils.getVector(
+      const rearWheelDirection = direction === 'forward' ? GeometryUtils.getDirection(
         _transformCoordinate(rearWheel.position),
         _transformCoordinate(frontWheel.position)
-      ) : GeometryUtils.getVector(
+      ) : GeometryUtils.getDirection(
         _transformCoordinate(frontWheel.position),
         _transformCoordinate(rearWheel.position)
       )
       const rearWheelStep = step * Math.abs(Math.cos(steeringRadian + correction))
-      const rearWheelPosition = GeometryUtils.getPointByPointVectorDistance(
+      const rearWheelPosition = GeometryUtils.getPointByPointDirectionDistance(
         _transformCoordinate(rearWheel.position),
-        rearWheelVector,
+        rearWheelDirection,
         rearWheelStep
       )
-      const verticalVector = GeometryUtils.getVerticalVector(
-        rearWheelVector,
+      const verticalDirection = GeometryUtils.getVerticalDirection(
+        rearWheelDirection,
         direction === 'back'
       )
-      const distalFrontWheelPosition = GeometryUtils.getPointByPointVectorDistance(
-        frontWheelPosition, verticalVector, wheelSpacing
+      const distalFrontWheelPosition = GeometryUtils.getPointByPointDirectionDistance(
+        frontWheelPosition, verticalDirection, wheelSpacing
       )
-      const distalRearWheelPosition = GeometryUtils.getPointByPointVectorDistance(
-        rearWheelPosition, verticalVector, wheelSpacing
+      const distalRearWheelPosition = GeometryUtils.getPointByPointDirectionDistance(
+        rearWheelPosition, verticalDirection, wheelSpacing
       )
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       drawOriginalAxles()
@@ -217,34 +177,37 @@
         _transformCoordinate(distalRearWheelPosition)
       )
       if (
-        (direction === 'forward' && rearWheelVector[1] > 0) ||
-        (direction === 'back' && rearWheelVector[1] < 0)
+        (direction === 'forward' && rearWheelDirection[1] > 0) ||
+        (direction === 'back' && rearWheelDirection[1] < 0)
       ) {
         wheelMoveTimeout = setTimeout(wheelMove, interval)
       }
     }
-    function moveForward () {
-      direction = 'forward'
-      steeringRadian = Math.PI * .25
-      correction = .0035 * -1
-      clearTimeout(wheelMoveTimeout)
-      wheelMove()
-    }
-    function moveBack () {
-      direction = 'back'
-      steeringRadian = Math.PI * .75 * -1
-      correction = .0035
-      clearTimeout(wheelMoveTimeout)
-      wheelMove()
-    }
-    function reset () {
-      window.location.reload()
+
+    const actions = {
+      moveForward () {
+        direction = 'forward'
+        steeringRadian = Math.PI * .25
+        correction = .0035 * -1
+        clearTimeout(wheelMoveTimeout)
+        wheelMove()
+      },
+      moveBack () {
+        direction = 'back'
+        steeringRadian = Math.PI * .75 * -1
+        correction = .0035
+        clearTimeout(wheelMoveTimeout)
+        wheelMove()
+      },
+      reset () {
+        window.location.reload()
+      }
     }
 
     /* Page */
     $('[data-action]').on('click', function () {
       const action = $(this).data('action')
-      window[action]()
+      actions[action]()
     })
   </script>
 </body>
