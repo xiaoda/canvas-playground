@@ -1,4 +1,4 @@
-export default [
+const data = [
   {
     brand: 'Audi',
     models: [
@@ -28,12 +28,12 @@ export default [
     brand: 'BMW',
     models: [
       {
-        model: '3 Series',
+        model: '3',
         type: 'Sedan',
         size: [4719, 1827, 1459]
       },
       {
-        model: '5 Series',
+        model: '5',
         type: 'Sedan',
         size: [4954, 1868, 1489]
       },

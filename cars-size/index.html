@@ -1,10 +1,139 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Cars Size</title>
   <meta charset="utf-8">
+  <title>Cars Size</title>
+  <style>
+    body {
+      font-family: PingFangSC-Light;
+      color: #111;
+    }
+    canvas {
+      display: block;
+      margin: 10px 0;
+      border: 1px solid #DDD;
+    }
+    .block {margin: 10px 0;}
+    .block-title {
+      display: inline-block;
+      min-width: 50px;
+      font-weight: bold;
+    }
+    .item {
+      display: inline-block;
+      margin-right: 10px;
+    }
+    .model-item {
+      padding: 3px 8px;
+      border: 2px solid #999;
+      color: #999;
+      cursor: pointer;
+    }
+  </style>
+  <script src="./data.js"></script>
 </head>
 <body>
+  <canvas width="600" height="600"></canvas>
+  <div class="block">
+    <span class="block-title">Direction</span>
+    <div>
+      <script>
+        document.write(Array('Upper', 'Side', 'Front').map((direction, index) => {
+          return `<label class="item">
+            <input
+              type="radio"
+              name="direction"
+              value="${direction.toLowerCase()}"
+              ${index ? '' : 'checked'}
+            >
+            ${direction}
+          </label>`
+        }).join(''))
+      </script>
+    </div>
+  </div>
+  <div id="chooseModels" class="block">
+    <script>
+      document.write(data.map(brandItem => {
+        return `<div class="block">
+          <span class="block-title">${brandItem.brand}</span>
+        ` +
+        brandItem.models.map(modelItem => {
+          return `<span class="item model-item">
+            ${modelItem.model}
+          </span>`
+        }).join('') +
+        `</div>`
+      }).join(''))
+    </script>
+  </div>
 
+  <script src="/libs/geometry-utils.js"></script>
+  <script src="/libs/jquery.min.js"></script>
+  <script>
+    /* Constants */
+    const canvas = $('canvas').get(0)
+    const ctx = canvas.getContext('2d')
+    const chosenModels = []
+    const defaultColor = '#999'
+    const colorsPool = [
+      '192,57,43', '142,68,173', '41,128,185', '22,160,133',
+      '26,188,156', '241,196,15', '230,126,34', '52,73,94'
+    ]
+    const $directionInput = $('input[name="direction"]')
+    const $chooseModelsBtn = $('#chooseModels .item')
+
+    /* Variables */
+    let direction = $directionInput.val()
+
+    /* Page */
+    function _getAvailableColor () {
+      const usedColors = chosenModels.map(chosenModel => chosenModel.color)
+      return colorsPool.find(color => !usedColors.includes(color))
+    }
+
+    $directionInput.on('change', function () {
+      direction = $(this).val()
+    })
+
+    $chooseModelsBtn.on('click', function () {
+      const isActive = $(this).hasClass('active')
+      const model = $(this).text().trim()
+      const brand = $(this).closest('.block').find('.block-title').text().trim()
+      if (isActive) {
+        const color = '#999'
+        chosenModels.splice(
+          chosenModels.findIndex(chosenModel => chosenModel.model === model), 1
+        )
+        $(this).css({
+          color,
+          borderColor: color
+        })
+      } else {
+        const availableColor = _getAvailableColor()
+        if (!availableColor) {
+          alert(`Up to ${colorsPool.length} models are chosen.`)
+          return
+        }
+        const color = `rgb(${availableColor})`
+        chosenModels.push({
+          ...data
+            .find(dataItem => dataItem.brand === brand)
+            .models.find(modelItem => modelItem.model === model),
+          color: availableColor
+        })
+        $(this).css({
+          color,
+          borderColor: color
+        })
+      }
+      $(this).toggleClass('active')
+    })
+
+    /* Canvas */
+    function draw () {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+    }
+  </script>
 </body>
 </html>
