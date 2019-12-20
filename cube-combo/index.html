@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Cube Combo</title>
+  <style>
+    canvas {
+      display: block;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <canvas width="600" height="600"></canvas>
+
+  <script src="/libs/geometry-utils.js"></script>
+  <script src="/libs/jquery.min.js"></script>
+  <script type="module">
+    import CubeCombo from './cube-combo.js'
+
+    /* Constants */
+    const canvas = $('canvas').get(0)
+    const ctx = canvas.getContext('2d')
+    const cubeCombo = new CubeCombo({
+      cubes: Array(
+        [0, 0, 0],
+        [1, -1, 1],
+        [-2, 2, -2]
+      )
+    })
+  </script>
+</body>
+</html>

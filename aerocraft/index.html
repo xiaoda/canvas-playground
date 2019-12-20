@@ -12,7 +12,7 @@
   </style>
 </head>
 <body>
-  <canvas></canvas>
+  <canvas width="600" height="600"></canvas>
 
   <script src="/libs/geometry-utils.js"></script>
   <script src="/libs/jquery.min.js"></script>
@@ -23,8 +23,6 @@
     /* Constants */
     const canvas = $('canvas').get(0)
     const ctx = canvas.getContext('2d')
-
-    canvas.width = canvas.height = 600
 
     function draw () {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
