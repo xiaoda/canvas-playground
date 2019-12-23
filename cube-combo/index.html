@@ -4,31 +4,87 @@
   <meta charset="utf-8">
   <title>Cube Combo</title>
   <style>
+    body {
+      font-family: PingFangSC-Light;
+      color: #333;
+    }
     canvas {
       display: block;
       margin: 10px 0;
       border: 1px solid #ddd;
     }
+    .block {margin: 10px 0;}
+    .block-title {
+      display: inline-block;
+      margin-right: 10px;
+      font-weight: bold;
+    }
+    .item {
+      display: inline-block;
+      margin-right: 10px;
+    }
   </style>
 </head>
 <body>
   <canvas width="600" height="600"></canvas>
+  <div class="block">
+    <span class="block-title">Direction</span>
+    <script>
+      document.write(Array('Front', 'Side', 'Upper').map(direction => {
+        return `<label class="item">
+          <input
+            type="radio"
+            name="direction"
+            value="${direction}"
+          >
+          ${direction}
+        </label>`
+      }).join(''))
+    </script>
+  </div>
 
   <script src="/libs/geometry-utils.js"></script>
   <script src="/libs/jquery.min.js"></script>
   <script type="module">
     import CubeCombo from './cube-combo.js'
+    import Painter from './painter.js'
 
     /* Constants */
     const canvas = $('canvas').get(0)
     const ctx = canvas.getContext('2d')
+    const $directionInput = $('input[name="direction"]')
+
+    /* Variables */
+    let direction
+
+    /* Init */
     const cubeCombo = new CubeCombo({
       cubes: Array(
         [0, 0, 0],
         [1, -1, 1],
-        [-2, 2, -2]
+        [-1, 1, -1]
       )
     })
+    const painter = new Painter({
+      ctx,
+      canvasSize: {
+        width: canvas.width,
+        height: canvas.height
+      },
+      cubeSize: 20
+    })
+
+    /* Page */
+    $directionInput.on('change', function () {
+      direction = $(this).val()
+      drawCubeFace()
+    })
+
+    /* Logic */
+    function drawCubeFace () {
+      if (!direction) return
+      painter.drawCubeFace(cubeCombo, direction)
+    }
   </script>
 </body>
 </html>

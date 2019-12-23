@@ -3,24 +3,35 @@ class CubeCombo {
     this.cubes = options.cubes || Array([0, 0, 0])
   }
 
-  getSize () {
-    const xList = this.cubes.map(cube => cube[0])
-    const yList = this.cubes.map(cube => cube[1])
-    const zList = this.cubes.map(cube => cube[2])
-    return {
-      x: [Math.min(...xList), Math.max(...xList)],
-      y: [Math.min(...yList), Math.max(...yList)],
-      z: [Math.min(...zList), Math.max(...zList)]
-    }
+  getBoundary () {
+    const coordinates = {}
+    const boundary = {}
+    Array('x', 'y', 'z').forEach((axis, index) => {
+      coordinates[axis] = this.cubes.map(cube => cube[index])
+    })
+    Object.keys(coordinates).forEach(axis => {
+      boundary[axis] = [
+        Math.min(...coordinates[axis]),
+        Math.max(...coordinates[axis])
+      ]
+    })
+    return boundary
   }
 
-  getMidpoint () {
-    const size = this.getSize()
+  getSize () {
+    const {x, y, z} = this.getBoundary()
     return [
-      size.x.reduce((sum, current) => sum + current) * .5,
-      size.y.reduce((sum, current) => sum + current) * .5,
-      size.z.reduce((sum, current) => sum + current) * .5
+      x[1] - x[0],
+      y[1] - y[0],
+      z[1] - z[0]
     ]
+  }
+
+  getMidPoint () {
+    const boundary = this.getBoundary()
+    return Object.keys(boundary).map(axis => {
+      return boundary[axis].reduce((sum, current) => sum + current) * .5
+    })
   }
 
   /* X & Y coordinates */
