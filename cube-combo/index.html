@@ -24,18 +24,22 @@
       margin-right: 10px;
     }
   </style>
+  <script>
+    const directions = ['Front', 'Side', 'Upper']
+  </script>
 </head>
 <body>
   <canvas width="600" height="600"></canvas>
   <div class="block">
     <span class="block-title">Direction</span>
     <script>
-      document.write(Array('Front', 'Side', 'Upper').map(direction => {
+      document.write(directions.map((direction, index) => {
         return `<label class="item">
           <input
             type="radio"
             name="direction"
             value="${direction}"
+            ${index ? '' : 'checked'}
           >
           ${direction}
         </label>`
@@ -47,6 +51,7 @@
   <script src="/libs/jquery.min.js"></script>
   <script type="module">
     import CubeCombo from './cube-combo.js'
+    import CubeDetector from './cube-detector.js'
     import Painter from './painter.js'
 
     /* Constants */
@@ -55,14 +60,19 @@
     const $directionInput = $('input[name="direction"]')
 
     /* Variables */
-    let direction
+    let direction = $directionInput.val()
 
     /* Init */
     const cubeCombo = new CubeCombo({
       cubes: Array(
-        [0, 0, 0],
-        [1, -1, 1],
-        [-1, 1, -1]
+        // [0, 0, 0],
+        [0, 0, 1],
+        [0, 1, 0],
+        [0, 1, 1],
+        [1, 0, 0],
+        [1, 0, 1],
+        [1, 1, 0],
+        [1, 1, 1]
       )
     })
     const painter = new Painter({
@@ -73,6 +83,16 @@
       },
       cubeSize: 20
     })
+    const cubeDetector = new CubeDetector()
+
+    drawCubeFace()
+    directions.forEach(direction => {
+      cubeDetector.setFaceLook(
+        direction.toLowerCase(),
+        cubeCombo[`get${direction}Look`]()
+      )
+    })
+    cubeDetector.guess()
 
     /* Page */
     $directionInput.on('change', function () {

@@ -48,7 +48,7 @@ class Painter {
   _formatCoordinate (x, y) {
     return [
       this.canvasSize.width * .5 + x,
-      this.canvasSize.height * .5 + y
+      this.canvasSize.height * .5 - y
     ]
   }
 }
