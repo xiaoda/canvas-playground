@@ -1,3 +1,5 @@
+import CubeCombo from './cube-combo.js'
+
 class CubeDetector {
   constructor () {
     this._init()
@@ -16,7 +18,6 @@ class CubeDetector {
   }
 
   guess () {
-    console.log(this.faceLooks)
     const {front, side, upper} = this.faceLooks
     const cubes = []
     front.forEach(cube => {
@@ -31,8 +32,47 @@ class CubeDetector {
         })
       })
     })
-    console.log(cubes)
-    return cubes
+    const levelCubes = Array([cubes])
+    let count = 0
+    while (
+      levelCubes[count] &&
+      levelCubes[count].length &&
+      count < 999
+    ) {
+      levelCubes[count + 1] = []
+      levelCubes[count].forEach(currentLevelCubes => {
+        for (let i = 0; i < currentLevelCubes.length; i++) {
+          const cubes = GeometryUtils.clone(currentLevelCubes)
+          cubes.splice(i, 1)
+          const cubeCombo = new CubeCombo({cubes})
+          if (
+            CubeCombo.isFaceLooksIdnetical(
+              cubeCombo.getFrontLook(),
+              this.faceLooks.front
+            ) &&
+            CubeCombo.isFaceLooksIdnetical(
+              cubeCombo.getSideLook(),
+              this.faceLooks.side
+            ) &&
+            CubeCombo.isFaceLooksIdnetical(
+              cubeCombo.getUpperLook(),
+              this.faceLooks.upper
+            ) &&
+            !GeometryUtils.includes(
+              levelCubes[count + 1],
+              cubes
+            )
+          ) {
+            levelCubes[count + 1].push(cubes)
+          }
+        }
+      })
+      if (!levelCubes[count + 1].length) {
+        delete levelCubes[count + 1]
+      }
+      count++
+    }
+    return levelCubes.flat()
   }
 
   clear () {

@@ -6,6 +6,32 @@ const GeometryUtils = {
   clone (object) {
     return JSON.parse(JSON.stringify(object))
   },
+  /* Only handle simple data types */
+  isObjectsEqual (...objects) {
+    const target = objects[0]
+    const otherObjects = objects.slice(1)
+    if (Array.isArray(target)) {
+      return target.every((item, index) => {
+        return this.isObjectsEqual(
+          item,
+          ...otherObjects.map(object => object[index])
+        )
+      }) && otherObjects.every(object => {
+        return object.length === target.length
+      })
+    } else if (typeof target === 'object') {
+      return Object.keys(target).every(key => {
+        return this.isObjectsEqual(
+          target[key],
+          ...otherObjects.map(object => object[key])
+        )
+      }) && otherObjects.every(object => {
+        return Object.keys(object).length === Object.keys(target).length
+      })
+    } else {
+      return otherObjects.every(object => object === target)
+    }
+  },
   unique (array) {
     return Array.from(
       new Set(array.map(arrayItem => JSON.stringify(arrayItem)))
@@ -13,7 +39,7 @@ const GeometryUtils = {
   },
   includes (array, item) {
     return array.some(arrayItem => {
-      return JSON.stringify(arrayItem) === JSON.stringify(item)
+      return this.isObjectsEqual(arrayItem, item)
     })
   },
   isBetween (limitA, limitB, x) {

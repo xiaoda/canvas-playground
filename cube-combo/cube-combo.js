@@ -54,6 +54,30 @@ class CubeCombo {
       this.cubes.map(cube => [cube[0], cube[2]])
     )
   }
+
+  static isCubeCombosIdentical (...CubeCombos) {
+    const target = CubeCombos[0]
+    const otherCubeCombos = CubeCombos.slice(1)
+    return target.every(cube => {
+      return otherCubeCombos.every(cubeCombo => {
+        return GeometryUtils.includes(cubeCombo, cube)
+      })
+    }) && otherCubeCombos.every(cubeCombo => {
+      return cubeCombo.length === target.length
+    })
+  }
+
+  static isFaceLooksIdnetical (...faces) {
+    const target = faces[0]
+    const otherFaces = faces.slice(1)
+    return target.every(piece => {
+      return faces.every(face => {
+        return GeometryUtils.includes(face, piece)
+      })
+    }) && otherFaces.every(face => {
+      return face.length === target.length
+    })
+  }
 }
 
 export default CubeCombo
