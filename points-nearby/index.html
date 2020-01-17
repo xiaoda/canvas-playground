@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Points Nearby</title>
+  <style>
+    canvas {
+      display: block;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <canvas width="600" height="600"></canvas>
+
+  <script src="/libs/geometry-utils.js"></script>
+  <script src="/libs/jquery.min.js"></script>
+  <script type="module">
+    import points from './point.js'
+    const {Point, ClosePoint, MidPoint, RemotePoint} = points
+  </script>
+</body>
+</html>
