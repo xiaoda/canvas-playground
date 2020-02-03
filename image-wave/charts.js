@@ -45,12 +45,17 @@ function initCharts (width, height) {
   for (let i = 0; i < height; i++) {
     columnOptions.data.labels.push(String(i))
   }
-  rowColorsChart = new Chart(rowColorsCtx, rowOptions)
-  columnColorsChart = new Chart(columnColorsCtx, columnOptions)
+  _setPageData({
+    rowColorsChart: new Chart(rowColorsCtx, rowOptions),
+    columnColorsChart: new Chart(columnColorsCtx, columnOptions)
+  })
 }
 
 function destroyCharts () {
-  rowColorsChart = columnColorsChart = null
+  _setPageData({
+    rowColorsChart: null,
+    columnColorsChart: null
+  })
   $('#rowColors, #columnColors').attr({
     width: 5,
     height: 2
@@ -59,6 +64,10 @@ function destroyCharts () {
 
 /* Update color wave chart */
 function updateChartsData () {
+  const {
+    rowColors, columnColors,
+    rowColorsChart, columnColorsChart
+  } = pageData
   rowColorsChart.data.datasets = []
   columnColorsChart.data.datasets = []
   const borderColorMap = {
@@ -93,6 +102,9 @@ function updateChartsData () {
 
 /* Update chosen position wave on chart */
 function updateChartsStatic (row, column) {
+  const {
+    rowColorsChart, columnColorsChart
+  } = pageData
   const highlightColor = 'rgba(0, 0, 0, .7)'
   Array(
     [rowColorsChart, column],
@@ -113,6 +125,9 @@ function updateChartsStatic (row, column) {
 
 /* Update hover position wave on chart */
 function updateChartsDynamic (row, column) {
+  const {
+    rowColorsChart, columnColorsChart
+  } = pageData
   if (!rowColorsChart.data.datasets.length) return
   if (rowColorsChart.data.datasets.length > 4) {
     rowColorsChart.data.datasets.shift()
@@ -138,6 +153,10 @@ function updateChartsDynamic (row, column) {
 
 /* Clear hover position wave on chart */
 function clearChartsDynamic () {
+  const {
+    rowColorsChart, columnColorsChart,
+    throttleInterval
+  } = pageData
   if (!rowColorsChart.data.datasets.length) return
   setTimeout(_ => {
     if (rowColorsChart.data.datasets.length > 4) {

@@ -5,7 +5,9 @@ const pageData = {
 }
 
 $('#upload').on('change', function (e) {
-  pageData.fileName = this.files[0].name
+  _setPageData({
+    fileName: this.files[0].name
+  })
   const image = new Image()
   image.onload = function () {
     _adjustCanvasSize(this.width, this.height)
@@ -18,6 +20,12 @@ $('[data-action]').on('click', function () {
   const action = $(this).data('action')
   window[action] && window[action]()
 })
+
+function _setPageData (dataObject) {
+  Object.keys(dataObject).forEach(key => {
+    pageData[key] = dataObject[key]
+  })
+}
 
 function _adjustCanvasSize (width, height) {
   canvas.width = width

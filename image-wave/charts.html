@@ -19,14 +19,20 @@
   <script src="charts.js"></script>
   <script>
     /* Constants */
+    const pageData = {
+      throttleInterval: 50,
+      rowColors: null,
+      columnColors: null,
+      rowColorsChart: null,
+      columnColorsChart: null
+    }
     const channel = new BroadcastChannel('image-wave')
-    const throttleInterval = 50
 
-    /* Variables */
-    let rowColors
-    let columnColors
-    let rowColorsChart
-    let columnColorsChart
+    function _setPageData (dataObject) {
+      Object.keys(dataObject).forEach(key => {
+        pageData[key] = dataObject[key]
+      })
+    }
 
     $(window).on('load', function () {
       channel.postMessage({
@@ -55,8 +61,10 @@
           break
 
         case 'colors':
-          rowColors = data.rowColors
-          columnColors = data.columnColors
+          _setPageData({
+            rowColors: data.rowColors,
+            columnColors: data.columnColors
+          })
           break
 
         case 'update':
