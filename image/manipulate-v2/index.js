@@ -1,8 +1,8 @@
-const canvas = $('#canvas').get(0)
+const canvas = document.getElementById('canvas')
 const ctx = canvas.getContext('2d')
 
 Component.create({
-  selector: '#upload',
+  elementId: 'upload',
   data: {
     fileName: null
   },
@@ -30,7 +30,7 @@ Component.create({
 })
 
 Component.create({
-  selector: '#sizeControl',
+  elementId: 'sizeControl',
   data () {
     const currentSize = 100
     const minSize = 5

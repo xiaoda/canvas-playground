@@ -14,7 +14,7 @@ class Component {
       )
     )
     this.methods = options.methods || {}
-    this.selector = options.selector
+    this.elementId = options.elementId
     this.optionFactory('parent', null)
     this.optionFactory('currentChildren', [])
     this.optionFactory('lastRenderChildren', [])
@@ -99,10 +99,10 @@ class Component {
   }
 
   update () {
-    const container = $(this.selector)
-    if (container.length) {
+    const container = document.getElementById(this.elementId)
+    if (container) {
       setTimeout(_ => {
-        container.html(this.render())
+        container.innerHTML = this.render()
       }, 0)
     } else if (this.parent()) {
       this.parent().needRerender(true)
