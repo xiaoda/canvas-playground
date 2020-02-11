@@ -1,5 +1,17 @@
-const canvas = document.getElementById('canvas')
-const ctx = canvas.getContext('2d')
+import manipulate from './manipulate.js'
+
+window.canvas = document.getElementById('canvas')
+window.ctx = canvas.getContext('2d')
+
+const appData = {
+  initialImageData: null
+}
+
+function setAppData (dataObject) {
+  Object.keys(dataObject).forEach(key => {
+    appData[key] = dataObject[key]
+  })
+}
 
 Component.create({
   elementId: 'upload',
@@ -22,7 +34,10 @@ Component.create({
       this.setData({fileName}, false)
       const image = new Image()
       image.onload = function () {
-        // todo
+        const initialImageData = manipulate.getImageData()
+        setAppData({initialImageData})
+        manipulate.changeCanvasSize(this.width, this.height)
+        ctx.drawImage(this, 0, 0)
       }
       image.src = URL.createObjectURL(file)
     }
@@ -58,9 +73,7 @@ Component.create({
     } = this.data
     return `
       <div class="block-title">Size</div>
-      <div>
-        ${currentSize}%
-      </div>
+      <div>${currentSize}%</div>
       <div>
         <input
           type="range"
@@ -89,6 +102,7 @@ Component.create({
       this.changeCurrentSize(newSize)
     },
     changeCurrentSize (newSize) {
+      const {initialImageData} = appData
       const {
         minSize, maxSize, sizeStep
       } = this.data
@@ -102,6 +116,9 @@ Component.create({
         this.setData({
           currentSize: newSize
         })
+        manipulate.changeImageSize(
+          initialImageData, newSize
+        )
       }
     }
   }
