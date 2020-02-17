@@ -1,9 +1,10 @@
-import manipulate from './manipulate.js'
+import Manipulate from './manipulate.js'
 
 window.canvas = document.getElementById('canvas')
 window.ctx = canvas.getContext('2d')
 
 const appData = {
+  fileName: null,
   initialImageData: null
 }
 
@@ -13,11 +14,8 @@ function setAppData (dataObject) {
   })
 }
 
-Component.create({
+const $upload = new Component({
   elementId: 'upload',
-  data: {
-    fileName: null
-  },
   render () {
     return `
       <input
@@ -30,21 +28,26 @@ Component.create({
   methods: {
     uploadImage (event) {
       const [file] = event.target.files
-      const {name: fileName} = file
-      this.setData({fileName}, false)
+      setAppData({
+        fileName: file.name
+      })
       const image = new Image()
-      image.onload = function () {
-        const initialImageData = manipulate.getImageData()
-        setAppData({initialImageData})
-        manipulate.changeCanvasSize(this.width, this.height)
-        ctx.drawImage(this, 0, 0)
+      image.onload =  _ => {
+        setAppData({
+          initialImageData: Manipulate.getImageData()
+        })
+        $sizeControl.setData({
+          currentSize: 100
+        })
+        Manipulate.changeCanvasSize(image.width, image.height)
+        ctx.drawImage(image, 0, 0)
       }
       image.src = URL.createObjectURL(file)
     }
   }
 })
 
-Component.create({
+const $sizeControl = new Component({
   elementId: 'sizeControl',
   data () {
     const currentSize = 100
@@ -102,9 +105,14 @@ Component.create({
       this.changeCurrentSize(newSize)
     },
     changeCurrentSize (newSize) {
-      const {initialImageData} = appData
       const {
-        minSize, maxSize, sizeStep
+        fileName, initialImageData
+      } = appData
+      const {
+        currentSize,
+        minSize,
+        maxSize,
+        sizeStep
       } = this.data
       if (
         newSize > maxSize ||
@@ -116,9 +124,9 @@ Component.create({
         this.setData({
           currentSize: newSize
         })
-        manipulate.changeImageSize(
-          initialImageData, newSize
-        )
+        if (!fileName) return
+        const ratio = newSize / currentSize
+        Manipulate.changeImageSize(initialImageData, ratio)
       }
     }
   }

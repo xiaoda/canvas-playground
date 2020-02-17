@@ -2,8 +2,13 @@ window._components = {}
 
 class Component {
   constructor (options = {}) {
-    this.instance = options.instance
-    this.instanceName = options.instanceName
+    this.instanceName = (
+      options.instanceName ?
+      options.instanceName :
+      `C${(Math.random() + 1).toString(36).substr(2, 5)}`
+    )
+    this.instance = `window._components.${this.instanceName}`
+    window._components[this.instanceName] = this
     this.data = (
       typeof options.data === 'function' ?
       options.data() :
@@ -66,8 +71,9 @@ class Component {
   getHook (key) {
     const hooks = {
       created: 'created',
+      mounted: 'mounted',
       updated: 'updated',
-      mounted: 'mounted'
+      beforeDestroy: 'beforeDestroy'
     }
     return key ? hooks[key] : hooks
   }
@@ -113,7 +119,13 @@ class Component {
   triggerHook (name) {
     const hook = this.getHook(name)
     const fun = this[hook]
-    if (typeof fun === 'function') fun()
+    if (typeof fun !== 'function') return
+    if (hook === this.getHook('beforeDestroy')) {
+      this.lastRenderChildren().forEach(child => {
+        child.triggerHook('beforeDestroy')
+      })
+    }
+    fun()
   }
 
   subComponent (component, dataObject) {
@@ -131,7 +143,7 @@ class Component {
       component = (
         window._components[instanceName] ?
         window._components[instanceName] :
-        Component.create({
+        new Component({
           ...component,
           instanceName
         })
@@ -157,27 +169,11 @@ class Component {
       })
     prevInstancesName.forEach(name => {
       if (!instancesName.includes(name)) {
+        window._components[name].triggerHook('beforeDestroy')
         delete window._components[name]
       }
     })
     this.lastRenderChildren(this.currentChildren())
     this.currentChildren([])
-  }
-
-  static create (options = {}) {
-    const instanceName = (
-      options.instanceName ?
-      options.instanceName :
-      `
-        C${Number(new Date())}
-        ${String(Math.random()).replace('.', '')}
-      `.replace(/\s/g, '')
-    )
-    window._components[instanceName] = new Component({
-      ...options,
-      instanceName,
-      instance: `window._components.${instanceName}`
-    })
-    return window._components[instanceName]
   }
 }
