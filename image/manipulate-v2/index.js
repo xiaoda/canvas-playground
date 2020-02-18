@@ -33,14 +33,14 @@ const $upload = new Component({
       })
       const image = new Image()
       image.onload =  _ => {
-        setAppData({
-          initialImageData: Manipulate.getImageData()
-        })
         $sizeControl.setData({
           currentSize: 100
         })
         Manipulate.changeCanvasSize(image.width, image.height)
         ctx.drawImage(image, 0, 0)
+        setAppData({
+          initialImageData: Manipulate.getImageData()
+        })
       }
       image.src = URL.createObjectURL(file)
     }
@@ -51,9 +51,9 @@ const $sizeControl = new Component({
   elementId: 'sizeControl',
   data () {
     const currentSize = 100
-    const minSize = 5
+    const minSize = 10
     const maxSize = 200
-    const sizeStep = 5
+    const sizeStep = 10
     const sizeMarks = []
     for (let i = minSize; i <= maxSize; i += sizeStep) {
       sizeMarks.push(i)
@@ -86,13 +86,13 @@ const $sizeControl = new Component({
           step="${sizeStep}"
           list="sizeMarks"
           onChange="${this.instance}.handleCurrentSizeInput(event)"
-          style="width: 500px;"
+          style="width: 300px;"
         >
         <datalist id="sizeMarks">` + sizeMarks.map(size => `
           <option value="${size}" label="${size}"></option>
         `).join('') + `</datalist>
       </div>
-      <div>` + [5, 50, 100, 150, 200].map(size => `
+      <div>` + [10, 50, 100, 150, 200].map(size => `
         <button
           onClick="${this.instance}.changeCurrentSize(${size})"
         >${size}%</button>
@@ -125,7 +125,7 @@ const $sizeControl = new Component({
           currentSize: newSize
         })
         if (!fileName) return
-        const ratio = newSize / currentSize
+        const ratio = newSize / 100
         Manipulate.changeImageSize(initialImageData, ratio)
       }
     }

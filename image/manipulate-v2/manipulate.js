@@ -14,35 +14,37 @@ export default {
     window.canvas.style.height = `${height / window.devicePixelRatio}px`
   },
 
-  changeImageSize (imageData, ratio) {
+  changeImageSize (srcImageData, ratio) {
     const {
       width:  srcWidth,
       height: srcHeight,
       data:   srcData
-    } = imageData
+    } = srcImageData
     const inverseRatio = 1 / ratio
     const srcPixelRange = inverseRatio
     const [distWidth, distHeight] =
       [srcWidth, srcHeight].map(size => {
         return Math.floor(size * ratio)
       })
-    const distImageData = ctx.createImageData(
+    const distImageData = window.ctx.createImageData(
       distWidth, distHeight
     )
+    const {
+      data: distData
+    } = distImageData
 
     for (let i = 0; i < distHeight; i++) {
       for (let j = 0; j < distWidth; j++) {
         const distIndex = (i * distWidth + j) * 4
-        const srcRowStart = i * inverseRatio
-        const srcRowEnd = (i + 1) * inverseRatio
-        const srcColumnStart = j * inverseRatio
-        const srcColumnEnd = (j + 1) * inverseRatio
+        const [srcRowStart, srcColumnStart] =
+          [i, j].map(position => position * inverseRatio)
+        const [srcRowEnd, srcColumnEnd] =
+          [i, j].map(position => (position + 1) * inverseRatio)
 
         /* Start to loop row */
         const kStart = Math.floor(srcRowStart)
         const kEnd = srcRowEnd
         for (let k = kStart; k < kEnd; k++) {
-          const rowIndex = k
           const rowRatio = _getRatioOfPixel(
             srcRowStart,
             srcRowEnd,
@@ -55,21 +57,28 @@ export default {
           const lStart = Math.floor(srcColumnStart)
           const lEnd = srcColumnEnd
           for (let l = lStart; l < lEnd; l++) {
-            const columnIndex = l
             const columnRatio = _getRatioOfPixel(
-              srcRowStart,
-              srcRowEnd,
-              kStart,
-              kEnd,
-              k
+              srcColumnStart,
+              srcColumnEnd,
+              lStart,
+              lEnd,
+              l
             )
 
             /* Combine row & column */
             const srcIndex = (k * srcWidth + l) * 4
+            const srcRatio = rowRatio * columnRatio
+            distData[distIndex] += srcData[srcIndex] * srcRatio
+            distData[distIndex + 1] += srcData[srcIndex + 1] * srcRatio
+            distData[distIndex + 2] += srcData[srcIndex + 2] * srcRatio
+            distData[distIndex + 3] += srcData[srcIndex + 3] * srcRatio
           }
         }
       }
     }
+
+    this.changeCanvasSize(distWidth, distHeight)
+    window.ctx.putImageData(distImageData, 0, 0)
 
     function _getRatioOfPixel (
       srcStart,
@@ -79,7 +88,7 @@ export default {
       loopCurrent
     ) {
       let ratio
-      if (loopEnd <= loopCurrent + 1) {
+      if (loopEnd <= loopStart + 1) {
         ratio = 1
       } else if (loopCurrent <= srcStart) {
         ratio = (loopCurrent + 1 - srcStart) / srcPixelRange
