@@ -88,15 +88,28 @@ const $sizeControl = new Component({
           onChange="${this.instance}.handleCurrentSizeInput(event)"
           style="width: 300px;"
         >
-        <datalist id="sizeMarks">` + sizeMarks.map(size => `
-          <option value="${size}" label="${size}"></option>
-        `).join('') + `</datalist>
+        <datalist id="sizeMarks">` +
+          sizeMarks.map(size => `
+            <option value="${size}" label="${size}"></option>
+          `).join('') + `
+        </datalist>
       </div>
-      <div>` + [10, 50, 100, 150, 200].map(size => `
+      <div>` +
+        [10, 50, 100, 150, 200].map(size => `
+          <button
+            onClick="${this.instance}.changeCurrentSize(${size})"
+          >
+            ${size}%
+          </button>
+        `).join('') + `
+      </div>
+      <div>
         <button
-          onClick="${this.instance}.changeCurrentSize(${size})"
-        >${size}%</button>
-      `).join('') + `</div>
+          onClick="${this.instance}.setCurrentSize2xSharp()"
+        >
+          2x Sharp
+        </button>
+      </div>
     `
   },
   methods: {
@@ -109,7 +122,6 @@ const $sizeControl = new Component({
         fileName, initialImageData
       } = appData
       const {
-        currentSize,
         minSize,
         maxSize,
         sizeStep
@@ -128,6 +140,16 @@ const $sizeControl = new Component({
         const ratio = newSize / 100
         Manipulate.changeImageSize(initialImageData, ratio)
       }
+    },
+    setCurrentSize2xSharp () {
+      const {
+        fileName, initialImageData
+      } = appData
+      this.setData({
+        currentSize: 200
+      })
+      if (!fileName) return
+      Manipulate.setImageSize2xSharp(initialImageData)
     }
   }
 })

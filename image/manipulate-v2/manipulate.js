@@ -15,13 +15,13 @@ export default {
   },
 
   changeImageSize (srcImageData, ratio) {
+    const inverseRatio = 1 / ratio
+    const srcPixelRange = inverseRatio
     const {
       width:  srcWidth,
       height: srcHeight,
       data:   srcData
     } = srcImageData
-    const inverseRatio = 1 / ratio
-    const srcPixelRange = inverseRatio
     const [distWidth, distHeight] =
       [srcWidth, srcHeight].map(size => {
         return Math.floor(size * ratio)
@@ -76,7 +76,6 @@ export default {
         }
       }
     }
-
     this.changeCanvasSize(distWidth, distHeight)
     window.ctx.putImageData(distImageData, 0, 0)
 
@@ -98,6 +97,89 @@ export default {
         ratio = (loopEnd - loopCurrent) / srcPixelRange
       }
       return ratio
+    }
+  },
+
+  setImageSize2xSharp (srcImageData) {
+    const {
+      width:  srcWidth,
+      height: srcHeight,
+      data:   srcData
+    } = srcImageData
+    const [distWidth, distHeight] =
+      [srcWidth, srcHeight].map(size => size * 2)
+    const distImageData = window.ctx.createImageData(
+      distWidth, distHeight
+    )
+    const {
+      data: distData
+    } = distImageData
+
+    for (let i = 0; i < distHeight; i++) {
+      for (let j = 0; j < distWidth; j++) {
+        const distIndex = (i * distWidth + j) * 4
+        const isSrcEvenRow = i % 2 === 0
+        const isSrcEvenColumn = j % 2 === 0
+        let srcIndexes = []
+        if (isSrcEvenRow && isSrcEvenColumn) { // position (0, 0)
+          const k = i / 2
+          const l = j / 2
+          const srcIndex = (k * srcWidth + l) * 4
+          srcIndexes = [srcIndex]
+        } else if (isSrcEvenRow && !isSrcEvenColumn) { // position (0, 1)
+          const k = i / 2
+          const ls = [
+            Math.floor(j / 2),
+            Math.ceil(j / 2)
+          ]
+          srcIndexes = ls.map(l => {
+            return (k * srcWidth + l) * 4
+          })
+        } else if (!isSrcEvenRow && isSrcEvenColumn) { // position (1, 0)
+          const ks = [
+            Math.floor(i / 2),
+            Math.ceil(i / 2)
+          ]
+          const l = j / 2
+          srcIndexes = ks.map(k => {
+            return (k * srcWidth + l) * 4
+          })
+        } else if (!isSrcEvenRow && !isSrcEvenColumn) { // position (1, 1)
+          const ks = [
+            Math.floor(i / 2),
+            Math.ceil(i / 2)
+          ]
+          const ls = [
+            Math.floor(j / 2),
+            Math.ceil(j / 2)
+          ]
+          srcIndexes = ks.map((k, kIndex) => {
+            return (k * srcWidth + ls[kIndex]) * 4
+          })
+        }
+
+        /* Combine pixels */
+        const combinePixelsData = _combinePixelsDataWrapper(srcIndexes)
+        distData[distIndex] = combinePixelsData()
+        distData[distIndex + 1] = combinePixelsData(1)
+        distData[distIndex + 2] = combinePixelsData(2)
+        distData[distIndex + 3] = combinePixelsData(3)
+      }
+    }
+    this.changeCanvasSize(distWidth, distHeight)
+    window.ctx.putImageData(distImageData, 0, 0)
+
+    function _combinePixelsData (srcIndexes, offset = 0) {
+      const srcRatio = 1 / srcIndexes.length
+      return srcIndexes.map(srcIndex => {
+        return srcData[srcIndex + offset] * srcRatio
+      }).reduce((accumulator, current) => {
+        return accumulator + current
+      })
+    }
+
+    function _combinePixelsDataWrapper (srcIndexes) {
+      return offset => _combinePixelsData(srcIndexes, offset)
     }
   }
 }
