@@ -88,20 +88,20 @@ const $sizeControl = new Component({
           onChange="${this.instance}.handleCurrentSizeInput(event)"
           style="width: 300px;"
         >
-        <datalist id="sizeMarks">` +
-          sizeMarks.map(size => `
+        <datalist id="sizeMarks">
+          ${sizeMarks.map(size => `
             <option value="${size}" label="${size}"></option>
-          `).join('') + `
+          `).join('')}
         </datalist>
       </div>
-      <div>` +
-        [10, 50, 100, 150, 200].map(size => `
+      <div>
+        ${[10, 50, 100, 150, 200].map(size => `
           <button
             onClick="${this.instance}.changeCurrentSize(${size})"
           >
             ${size}%
           </button>
-        `).join('') + `
+        `).join('')}
       </div>
       <div>
         <button
