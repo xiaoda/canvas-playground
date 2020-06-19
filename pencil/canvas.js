@@ -15,9 +15,9 @@ const CanvasUtils = {
     ctx.lineJoin = options.lineJoin || 'round'
   },
 
-  mapCoordinate (point) {
-    const coordinateRatio = 2
-    point = point.map(coordinate => coordinate * coordinateRatio)
+  mapCoordinates (point) {
+    const ratio = 2
+    point = point.map(coordinate => coordinate * ratio)
     return point
   },
 
