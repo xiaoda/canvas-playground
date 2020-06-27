@@ -9,7 +9,7 @@ const CanvasUtils = {
   },
 
   setLineStyles (options = {}) {
-    ctx.lineWidth = options.lineWidth || 10
+    ctx.lineWidth = options.lineWidth || 6
     ctx.strokeStyle = options.strokeStyle || '#333'
     ctx.lineCap = options.lineCap || 'round'
     ctx.lineJoin = options.lineJoin || 'round'
