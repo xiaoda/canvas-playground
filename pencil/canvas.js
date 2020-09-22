@@ -1,5 +1,6 @@
 /* Constants */
-const LINE_WIDTH = 6
+const LINE_WIDTH = 3
+const SHADOW_RANGE = 3
 
 /* Temp */
 let _lastPoint = []
@@ -15,10 +16,10 @@ const CanvasUtils = {
   },
 
   setLineStyles (options = {}) {
-    ctx.lineWidth = options.lineWidth || LINE_WIDTH
+    ctx.lineWidth = options.lineWidth || (LINE_WIDTH + SHADOW_RANGE)
     ctx.lineCap = options.lineCap || 'round'
     ctx.lineJoin = options.lineJoin || 'round'
-    ctx.strokeStyle = options.strokeStyle || '#333'
+    ctx.strokeStyle = options.strokeStyle || '#222'
   },
 
   mapCoordinates (point) {
@@ -48,14 +49,14 @@ const CanvasUtils = {
     if (!pointA) return
     else if (!pointB) pointB = pointA
     const distanceRange = LINE_WIDTH / 2
-    const distanceLimit = distanceRange + 1
+    const distanceLimit = distanceRange + SHADOW_RANGE
 
     function _getBoundaries (...coordinates) {
       const boundaries = Array(...coordinates)
         .sort((a, b) => a - b)
         .map((x, index) => {
           const boundary = (
-            x + LINE_WIDTH / 2 * (index ? 1 : -1)
+            x + (LINE_WIDTH / 2 + SHADOW_RANGE) * (index ? 1 : -1)
           )
           const intBoundary = (
             index ?
@@ -78,33 +79,28 @@ const CanvasUtils = {
           (distanceLimit - distanceRange)
         )
       }
+      grayScale *= 0.9
       const grayValue = Number.parseInt(
         (1 - grayScale) * 255
       )
       return grayValue
     }
 
-    const xBoundaries = _getBoundaries(
-      pointA[0], pointB[0]
-    )
-    const yBoundaries = _getBoundaries(
-      pointA[1], pointB[1]
-    )
+    const xBoundaries = _getBoundaries(pointA[0], pointB[0])
+    const yBoundaries = _getBoundaries(pointA[1], pointB[1])
+    const xBoundariesLength = xBoundaries[1] - xBoundaries[0]
+    const yBoundariesLength = yBoundaries[1] - yBoundaries[0]
     const imageData = ctx.getImageData(
-      0, 0, canvas.width, canvas.height
+      xBoundaries[0], yBoundaries[0],
+      xBoundariesLength, yBoundariesLength
     )
-    for (
-      let i = xBoundaries[0];
-      i <= xBoundaries[1];
-      i++
-    ) {
-      for (
-        let j = yBoundaries[0];
-        j <= yBoundaries[1];
-        j++
-      ) {
-        const point = [i, j]
-        const dataIndex = (j * imageData.width + i) * 4
+    for (let i = 0; i < xBoundariesLength; i++) {
+      for (let j = 0; j < yBoundariesLength; j++) {
+        const point = [
+          xBoundaries[0] + i,
+          yBoundaries[0] + j
+        ]
+        const dataIndex = (j * xBoundariesLength + i) * 4
         const distance = GeometryUtils.getDistanceFromPointToLineSegment(
           pointA, pointB, point
         )
@@ -121,6 +117,8 @@ const CanvasUtils = {
         }
       }
     }
-    ctx.putImageData(imageData, 0, 0)
+    ctx.putImageData(
+      imageData, xBoundaries[0], yBoundaries[0]
+    )
   }
 }
