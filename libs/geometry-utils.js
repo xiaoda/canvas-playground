@@ -1,11 +1,19 @@
 const GeometryUtils = {
-
   /**
    * Common
    */
   clone (object) {
     return JSON.parse(JSON.stringify(object))
   },
+
+  unique (array) {
+    return Array.from(
+      new Set(
+        array.map(arrayItem => JSON.stringify(arrayItem))
+      )
+    ).map(arrayItem => JSON.parse(arrayItem))
+  },
+
   /* Only handle simple data types */
   isObjectsEqual (...objects) {
     const target = objects[0]
@@ -26,25 +34,26 @@ const GeometryUtils = {
           ...otherObjects.map(object => object[key])
         )
       }) && otherObjects.every(object => {
-        return Object.keys(object).length === Object.keys(target).length
+        return (
+          Object.keys(object).length ===
+          Object.keys(target).length
+        )
       })
     } else {
       return otherObjects.every(object => object === target)
     }
   },
-  unique (array) {
-    return Array.from(
-      new Set(array.map(arrayItem => JSON.stringify(arrayItem)))
-    ).map(arrayItem => JSON.parse(arrayItem))
-  },
+
   includes (array, item) {
     return array.some(arrayItem => {
       return this.isObjectsEqual(arrayItem, item)
     })
   },
+
   isBetween (limitA, limitB, x) {
     return (x - limitA) * (x - limitB) <= 0
   },
+
   isBetweenByOdd (limits, x) {
     let smallerCount = 0
     let biggerCount = 0
@@ -52,28 +61,45 @@ const GeometryUtils = {
       if (x >= limit) smallerCount++
       if (x <= limit) biggerCount++
     })
-    return !!smallerCount && !!biggerCount &&
-           (smallerCount % 2 === 1 || biggerCount % 2 === 1)
+    return (
+      !!smallerCount &&
+      !!biggerCount &&
+      (
+        smallerCount % 2 === 1 ||
+        biggerCount % 2 === 1
+      )
+    )
   },
+
   mix (a, b, ratio) {
     return a * (1 - ratio) + b * ratio
   },
+
+  changeByPercent (current, target, percent) {
+    return this.mix(current, target, percent)
+  },
+
   map (a, b, x) {
     return x / a * b
   },
+
   clamp (min, max, x) {
     return Math.min(Math.max(x, min), max)
   },
-  changeByPercent (current, target, percent) {
-    return current + (target - current) * percent
-  },
+
   formatRadian (radian) {
     while (Math.abs(radian) > Math.PI) {
-      radian += Math.PI * 2 * (radian / Math.abs(radian)) * -1
+      radian += (
+        Math.PI * 2 * (radian / Math.abs(radian)) * -1
+      )
     }
     return radian
   },
-  linearChange (initial, target, duration, callback, precision = 0) {
+
+  linearChange (
+    initial, target, duration,
+    callback, precision = 0
+  ) {
     const startTimestamp = +new Date()
     const intervalID = setInterval(_ => {
       const timestamp = +new Date()
@@ -82,11 +108,15 @@ const GeometryUtils = {
         clearInterval(intervalID)
         return
       }
-      const current = initial + (target - initial) * (timePassed / duration)
+      const current = (
+        initial +
+        (target - initial) * (timePassed / duration)
+      )
       callback(current)
     }, precision)
     return intervalID
   },
+
   debounce (fun, interval) {
     let timeoutHandler
     return function () {
@@ -98,6 +128,7 @@ const GeometryUtils = {
       }, interval)
     }
   },
+
   throttle (fun, interval) {
     let lastTime, timeoutHandler
     return function (args) {
@@ -116,6 +147,7 @@ const GeometryUtils = {
       }
     }
   },
+
   setTimeoutCustom (callback, delay, precision = 0) {
     const startTimestamp = +new Date()
     const intervalID = setInterval(_ => {
@@ -127,6 +159,7 @@ const GeometryUtils = {
     }, precision)
     return intervalID
   },
+
   setIntervalCustom (callback, delay, precision = 0) {
     let startTimestamp = +new Date()
     return setInterval(_ => {
@@ -137,6 +170,7 @@ const GeometryUtils = {
       }
     }, precision)
   },
+
   chain (data, ...args) {
     args.forEach(arg => {
       if (Array.isArray(arg)) {
@@ -154,20 +188,26 @@ const GeometryUtils = {
    * Basic
    */
   getDistanceBetweenPoints (pointA, pointB) {
-    return ((pointA[0] - pointB[0]) ** 2 + (pointA[1] - pointB[1]) ** 2) ** .5
+    return (
+      (pointA[0] - pointB[0]) ** 2 +
+      (pointA[1] - pointB[1]) ** 2
+    ) ** .5
   },
+
   getPointByOffset (point, offset = {}) {
     return [
       point[0] + (offset.x || 0),
       point[1] + (offset.y || 0)
     ]
   },
+
   getMidPointBetweenPoints (pointA, pointB, ratio = .5) {
     return [
       this.mix(pointA[0], pointB[0], ratio),
       this.mix(pointA[1], pointB[1], ratio)
     ]
   },
+
   getPointBetweenPointsByX (pointA, pointB, x) {
     if (!this.isBetween(pointA[0], pointB[0], x)) {
       return null
@@ -179,6 +219,7 @@ const GeometryUtils = {
       return [x, y]
     }
   },
+
   getPointBetweenPointsByY (pointA, pointB, y) {
     if (!this.isBetween(pointA[1], pointB[1], y)) {
       return null
@@ -190,21 +231,28 @@ const GeometryUtils = {
       return [x, y]
     }
   },
+
   getPointByPointDirectionDistance (point, direction, distance) {
-    if (distance < 0) direction = [direction[0] * -1, direction[1] * -1]
-    const x = (distance ** 2 / (direction[0] ** 2 + direction[1] ** 2)) ** .5
+    if (distance < 0) {
+      direction = [direction[0] * -1, direction[1] * -1]
+    }
+    const x = (
+      distance ** 2 /
+      (direction[0] ** 2 + direction[1] ** 2)
+    ) ** .5
     return [
       point[0] + direction[0] * x,
       point[1] + direction[1] * x
     ]
   },
+
   getPointByPointRadianDistance (point, radian, distance) {
     radian = this.formatRadian(radian)
     let direction = []
     if (Math.abs(radian) === Math.PI / 2) {
       direction = [0, radian / Math.abs(radian)]
     } else {
-      const quadrant = this.getQuadrantFromRadian(radian)
+      const quadrant = this.getImpreciseQuadrantFromRadian(radian)
       switch (quadrant) {
         case 0:
         case 3:
@@ -217,8 +265,11 @@ const GeometryUtils = {
       }
       direction[1] = direction[0] * Math.tan(radian)
     }
-    return this.getPointByPointDirectionDistance(point, direction, distance)
+    return this.getPointByPointDirectionDistance(
+      point, direction, distance
+    )
   },
+
   getCurvePointBetweenPoints (pointA, pointB, curvature) {
     const midPoint = this.getMidPointBetweenPoints(pointA, pointB)
     const direction = this.getDirection(pointA, pointB)
@@ -229,13 +280,20 @@ const GeometryUtils = {
       midPoint, verticalDirection, curveDistance
     )
   },
+
   getDirection (pointA, pointB) {
     return [pointB[0] - pointA[0], pointB[1] - pointA[1]]
   },
+
   getVerticalDirection (direction, clockwise = 1) {
-    const quadrant = this.getQuadrant(direction)
-    const verticalDirection = [Math.abs(direction[1]), Math.abs(direction[0])]
-    let verticalDirectionQuadrant = quadrant + (clockwise ? -1 : 1)
+    const quadrant = this.getImpreciseQuadrant(direction)
+    const verticalDirection = [
+      Math.abs(direction[1]),
+      Math.abs(direction[0])
+    ]
+    let verticalDirectionQuadrant = (
+      quadrant + (clockwise ? -1 : 1)
+    )
     switch (verticalDirectionQuadrant) {
       case 0: // 1st quadrant
       case 4:
@@ -254,6 +312,11 @@ const GeometryUtils = {
     }
     return verticalDirection
   },
+
+  getVector (pointA, pointB) {
+    return this.getDirection(pointA, pointB)
+  },
+
   mergeVectors (...vectors) {
     const finalPoint = [0, 0]
     vectors.forEach(vector => {
@@ -268,7 +331,8 @@ const GeometryUtils = {
       this.getDistanceBetweenPoints([0, 0], finalPoint)
     ]
   },
-  getQuadrant (pointOrDirection) {
+
+  getImpreciseQuadrant (pointOrDirection) {
     let quadrant
     if (pointOrDirection[0] > 0) {
       if (pointOrDirection[1] > 0) {
@@ -285,7 +349,8 @@ const GeometryUtils = {
     }
     return quadrant
   },
-  getQuadrantFromRadian (radian) {
+
+  getImpreciseQuadrantFromRadian (radian) {
     radian = this.formatRadian(radian)
     let quadrant
     if (radian > 0) {
@@ -303,6 +368,7 @@ const GeometryUtils = {
     }
     return quadrant
   },
+
   getRadian (vertex, pointA, pointB) {
     const checkYPositive = direction => {
       let reversed = 0
@@ -312,14 +378,18 @@ const GeometryUtils = {
       }
       return [direction, reversed]
     }
-    const [directionAX, directionAXReversed] = checkYPositive(
+    const [
+      directionAX, directionAXReversed
+    ] = checkYPositive(
       [pointA[0] - vertex[0], pointA[1] - vertex[1]]
     )
     const radianAX = (
       Math.atan2(directionAX[1], directionAX[0]) +
       Math.PI * directionAXReversed
     )
-    const [directionBX, directionBXReversed] = checkYPositive(
+    const [
+      directionBX, directionBXReversed
+    ] = checkYPositive(
       [pointB[0] - vertex[0], pointB[1] - vertex[1]]
     )
     const radianBX = (
@@ -329,22 +399,31 @@ const GeometryUtils = {
     const radian = this.formatRadian(radianBX - radianAX)
     return radian
   },
+
   getRadianFromXAxis (point) {
     return this.getRadian([0, 0], [1, 0], point)
   },
+
   transformPointByRadian (point, radian) {
     const distance = this.getDistanceBetweenPoints(point, [0, 0])
     const pointRadian = this.getRadianFromXAxis(point)
     const distRadian = this.formatRadian(pointRadian + radian)
     const distPoint = []
-    distPoint[0] = (distance ** 2 / (1 + Math.tan(distRadian) ** 2)) ** .5
-    if (distRadian > Math.PI * .5 || distRadian < Math.PI * .5 * -1) {
+    distPoint[0] = (
+      distance ** 2 /
+      (1 + Math.tan(distRadian) ** 2)
+    ) ** .5
+    if (
+      distRadian > Math.PI * .5 ||
+      distRadian < Math.PI * .5 * -1
+    ) {
       distPoint[0] *= -1
     }
-    distPoint[1] =
+    distPoint[1] = (
       Math.abs(distRadian) === Math.PI * .5 ?
       distance * (distRadian / Math.abs(distRadian)) :
       distPoint[0] * Math.tan(distRadian)
+    )
     return distPoint
   },
 
@@ -356,18 +435,28 @@ const GeometryUtils = {
     const verticalPointsY = []
     for (let i = 0; i < vertices.length; i++) {
       const thisVertex = vertices[i]
-      const nextVertex = i === vertices.length - 1 ? vertices[0] : vertices[i + 1]
+      const nextVertex = (
+        i === vertices.length - 1 ?
+        vertices[0] :
+        vertices[i + 1]
+      )
       const horizontalPoint = this.getPointBetweenPointsByY(
         thisVertex, nextVertex, point[1]
       )
-      if (horizontalPoint) horizontalPointsX.push(horizontalPoint[0])
+      if (horizontalPoint) {
+        horizontalPointsX.push(horizontalPoint[0])
+      }
       const verticalPoint = this.getPointBetweenPointsByX(
         thisVertex, nextVertex, point[0]
       )
-      if (verticalPoint) verticalPointsY.push(verticalPoint[1])
+      if (verticalPoint) {
+        verticalPointsY.push(verticalPoint[1])
+      }
     }
-    return this.isBetweenByOdd(horizontalPointsX, point[0]) &&
-           this.isBetweenByOdd(verticalPointsY, point[1])
+    return (
+      this.isBetweenByOdd(horizontalPointsX, point[0]) &&
+      this.isBetweenByOdd(verticalPointsY, point[1])
+    )
   },
 
   /**
@@ -378,43 +467,137 @@ const GeometryUtils = {
     let totalRadian = 0
     for (let i = 0; i < vertices.length; i++) {
       const thisVertex = vertices[i]
-      const nextVertex = i === vertices.length - 1 ? vertices[0] : vertices[i + 1]
-      totalRadian += this.getRadian(point, thisVertex, nextVertex)
+      const nextVertex = (
+        i === vertices.length - 1 ?
+        vertices[0] :
+        vertices[i + 1]
+      )
+      totalRadian += this.getRadian(
+        point, thisVertex, nextVertex
+      )
     }
-    return Math.abs(totalRadian) > Math.PI * 2 - .01 &&
-           Math.abs(totalRadian) < Math.PI * 2 + .01
+    return (
+      Math.abs(totalRadian) > Math.PI * 2 - .01 &&
+      Math.abs(totalRadian) < Math.PI * 2 + .01
+    )
+  },
+
+  getDistanceFromPointToLineSegment (
+    vertexA, vertexB, point
+  ) {
+    const distanceFromVertexA = this.getDistanceBetweenPoints(
+      point, vertexA
+    )
+    const distanceFromVertexB = this.getDistanceBetweenPoints(
+      point, vertexB
+    )
+    let distance
+    if (vertexA[0] === vertexB[0]) {
+      distance = (
+        this.isBetween(
+          vertexA[1], vertexB[1], point[1]
+        ) ?
+        Math.abs(point[0] - vertexA[0]) :
+        Math.min(
+          distanceFromVertexA,
+          distanceFromVertexB
+        )
+      )
+    } else if (vertexA[1] === vertexB[1]) {
+      distance = (
+        this.isBetween(
+          vertexA[0], vertexB[0], point[0]
+        ) ?
+        Math.abs(point[1] - vertexA[1]) :
+        Math.min(
+          distanceFromVertexA,
+          distanceFromVertexB
+        )
+      )
+    } else {
+      const a = (
+        (vertexA[1] - vertexB[1]) /
+        (vertexA[0] - vertexB[0])
+      )
+      const b = vertexA[1] - a * vertexA[0]
+      const c = -1 / a
+      const d = point[1] - c * point[0]
+      const crossPoint = []
+      crossPoint[0] = (d - b) / (a - c)
+      crossPoint[1] = a * crossPoint[0] + b
+      distance = (
+        this.isBetween(
+          vertexA[0], vertexB[0], crossPoint[0]
+        ) ?
+        this.getDistanceBetweenPoints(
+          point, crossPoint
+        ) :
+        Math.min(
+          distanceFromVertexA,
+          distanceFromVertexB
+        )
+      )
+    }
+    return distance
+  },
+
+  getDistanceFromPointToLineSegmentV1 (
+    vertexA, vertexB, point
+  ) {
+    const translatedVertexB = this.getVector(
+      vertexA, vertexB
+    )
+    const translatedPoint = this.getVector(
+      vertexA, point
+    )
+    const transformedVertexB = [
+      this.getDistanceBetweenPoints(
+        translatedVertexB, [0, 0]
+      ), 0
+    ]
+    const radian = this.getRadian(
+      [0, 0],
+      translatedVertexB,
+      transformedVertexB
+    )
+    const transformedPoint = this.transformPointByRadian(
+      translatedPoint, radian
+    )
+    let distance
+    if (this.isBetween(
+      0,
+      transformedVertexB[0],
+      transformedPoint[0]
+    )) {
+      distance = Math.abs(transformedPoint[1])
+    } else {
+      distance = Math.min(
+        this.getDistanceBetweenPoints(
+          transformedPoint, [0, 0]
+        ),
+        this.getDistanceBetweenPoints(
+          transformedPoint, transformedVertexB
+        )
+      )
+    }
+    return distance
   },
 
   /**
    * Get distance whether a point is in polygon or not
    */
-  getPointDistanceFromPolygon (vertices, point) {
+  getDistanceFromPointToPolygon (vertices, point) {
     const distances = []
     for (let i = 0; i < vertices.length; i++) {
       const thisVertex = vertices[i]
-      const nextVertex = i === vertices.length - 1 ? vertices[0] : vertices[i + 1]
-      const translatedNextVertex = this.getDirection(thisVertex, nextVertex)
-      const translatedPoint = this.getDirection(thisVertex, point)
-      const transformedNextVertex = [
-        this.getDistanceBetweenPoints(translatedNextVertex, [0, 0]), 0
-      ]
-      const radian = this.getRadian(
-        [0, 0],
-        translatedNextVertex,
-        transformedNextVertex
+      const nextVertex = (
+        i === vertices.length - 1 ?
+        vertices[0] :
+        vertices[i + 1]
       )
-      const transformedPoint = this.transformPointByRadian(translatedPoint, radian)
-      let distance
-      if (this.isBetween(
-        0, transformedNextVertex[0], transformedPoint[0]
-      )) {
-        distance = Math.abs(transformedPoint[1])
-      } else {
-        distance = Math.min(
-          this.getDistanceBetweenPoints(transformedPoint, [0, 0]),
-          this.getDistanceBetweenPoints(transformedPoint, transformedNextVertex)
-        )
-      }
+      const distance = this.getDistanceFromPointToLineSegment(
+        thisVertex, nextVertex, point
+      )
       distances.push(distance)
     }
     return Math.min(...distances)
@@ -424,17 +607,23 @@ const GeometryUtils = {
    * Judge point being in circle
    */
   isPointInCircle (center, radius, point) {
-    const distance = this.getDistanceBetweenPoints(center, point)
+    const distance = this.getDistanceBetweenPoints(
+      center, point
+    )
     return distance <= radius
   },
 
   /**
    * Get distance whether a point is in circle or not
    */
-  getPointDistanceFromCircle (center, radius, point) {
-    const distance = this.getDistanceBetweenPoints(center, point)
+  getDistanceFromPointToCircle (center, radius, point) {
+    const distance = this.getDistanceBetweenPoints(
+      center, point
+    )
     return Math.abs(distance - radius)
   }
 }
 
-if (typeof module !== 'undefined') module.exports = GeometryUtils
+if (typeof module !== 'undefined') {
+  module.exports = GeometryUtils
+}

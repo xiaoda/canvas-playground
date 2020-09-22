@@ -1,5 +1,5 @@
 /* Configs */
-const USE_PENCIL = 1
+const USE_PENCIL = 0
 
 /* Constants */
 const $canvas = $('#canvas')
@@ -15,7 +15,7 @@ $canvas.on('touchstart', function (event) {
   const {touchType, clientX, clientY} = touch
   if (USE_PENCIL && touchType !== 'stylus') return
   const point = CanvasUtils.mapCoordinates([clientX, clientY])
-  CanvasUtils.connectPoints(point)
+  CanvasUtils.connectPointsByPixel(point)
   CanvasUtils.saveLastPoint(point)
 })
 
@@ -25,6 +25,6 @@ $canvas.on('touchmove', function (event) {
   if (USE_PENCIL && touchType !== 'stylus') return
   const point = CanvasUtils.mapCoordinates([clientX, clientY])
   const lastPoint = CanvasUtils.getLastPoint()
-  CanvasUtils.connectPoints(lastPoint, point)
+  CanvasUtils.connectPointsByPixel(lastPoint, point)
   CanvasUtils.saveLastPoint(point)
 })
