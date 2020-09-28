@@ -1,4 +1,5 @@
 /* Constants */
+const CANVAS_RATIO = 2
 const LINE_WIDTH = 3
 const SHADOW_RANGE = 3
 
@@ -9,8 +10,8 @@ const CanvasUtils = {
   initCanvas () {
     canvas.style.width = `${window.innerWidth}px`
     canvas.style.height = `${window.innerHeight}px`
-    canvas.width = window.innerWidth * 2
-    canvas.height = window.innerHeight * 2
+    canvas.width = window.innerWidth * CANVAS_RATIO
+    canvas.height = window.innerHeight * CANVAS_RATIO
     ctx.fillStyle = '#FFF'
     ctx.fillRect(0, 0, canvas.width, canvas.height)
   },
@@ -23,7 +24,7 @@ const CanvasUtils = {
   },
 
   mapCoordinates (point) {
-    const ratio = 2
+    const ratio = CANVAS_RATIO
     point = point.map(coordinate => coordinate * ratio)
     return point
   },
