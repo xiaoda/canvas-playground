@@ -4,7 +4,10 @@ const LINE_WIDTH = 3
 const SHADOW_RANGE = 3
 
 /* Temp */
+let _imageDataHistory = []
+let _currentHistoryIndex = 0
 let _lastPoint = []
+let _lastSeriesPoints = []
 
 const CanvasUtils = {
   initCanvas () {
@@ -14,6 +17,7 @@ const CanvasUtils = {
     canvas.height = window.innerHeight * CANVAS_RATIO
     ctx.fillStyle = '#FFF'
     ctx.fillRect(0, 0, canvas.width, canvas.height)
+    this.saveImageDataHistory()
   },
 
   setLineStyles (options = {}) {
@@ -29,12 +33,54 @@ const CanvasUtils = {
     return point
   },
 
+  saveImageDataHistory (imageData) {
+    imageData = imageData ? imageData : (
+      ctx.getImageData(0, 0, canvas.width, canvas.height)
+    )
+    let currentHistoryIndex = this.getCurrentHistoryIndex()
+    _imageDataHistory.splice(
+      currentHistoryIndex + 1,
+      _imageDataHistory.length
+    )
+    currentHistoryIndex = (
+      _imageDataHistory.push(imageData) - 1
+    )
+    this.setCurrentHistoryIndex(currentHistoryIndex)
+  },
+
+  getImageDataHistory () {
+    return _imageDataHistory
+  },
+
+  setCurrentHistoryIndex (index) {
+    _currentHistoryIndex = index
+    const imageDataHistory = this.getImageDataHistory()
+    const imageData = imageDataHistory[index]
+    ctx.putImageData(imageData, 0, 0)
+  },
+
+  getCurrentHistoryIndex () {
+    return _currentHistoryIndex
+  },
+
   saveLastPoint (point) {
     _lastPoint = point
   },
 
   getLastPoint () {
     return _lastPoint
+  },
+
+  clearLastSeriesPoints () {
+    _lastSeriesPoints = []
+  },
+
+  saveLastSeriesPoints (point) {
+    _lastSeriesPoints.push(point)
+  },
+
+  getLastSeriesPoints () {
+    return _lastSeriesPoints
   },
 
   connectPoints (pointA, pointB) {
@@ -121,5 +167,10 @@ const CanvasUtils = {
     ctx.putImageData(
       imageData, xBoundaries[0], yBoundaries[0]
     )
+  },
+
+  smoothLastLine () {
+    const lastSeriesPoints = this.getLastSeriesPoints()
+    console.log(lastSeriesPoints)
   }
 }

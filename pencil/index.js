@@ -5,11 +5,27 @@ const USE_PENCIL = 0
 const $canvas = $('#canvas')
 const canvas = $canvas.get(0)
 const ctx = canvas.getContext('2d')
+const $backButton = $('#back')
+const $forwardButton = $('#forward')
+const $smoothButton = $('#smooth')
 
-/* Init */
-CanvasUtils.initCanvas()
-CanvasUtils.setLineStyles()
+/* Functions */
+function updateControls () {
+  const imageDataHistory = CanvasUtils.getImageDataHistory()
+  const currentHistoryIndex = CanvasUtils.getCurrentHistoryIndex()
+  if (currentHistoryIndex > 0) {
+    $backButton.removeAttr('disabled')
+  } else {
+    $backButton.attr('disabled', 'disabled')
+  }
+  if (currentHistoryIndex < imageDataHistory.length - 1) {
+    $forwardButton.removeAttr('disabled')
+  } else {
+    $forwardButton.attr('disabled', 'disabled')
+  }
+}
 
+/* Events */
 $canvas.on('touchstart', function (event) {
   const [touch] = event.touches
   const {touchType, clientX, clientY} = touch
@@ -17,6 +33,8 @@ $canvas.on('touchstart', function (event) {
   const point = CanvasUtils.mapCoordinates([clientX, clientY])
   CanvasUtils.connectPointsByPixel(point)
   CanvasUtils.saveLastPoint(point)
+  CanvasUtils.clearLastSeriesPoints()
+  CanvasUtils.saveLastSeriesPoints(point)
 })
 
 $canvas.on('touchmove', function (event) {
@@ -27,4 +45,35 @@ $canvas.on('touchmove', function (event) {
   const lastPoint = CanvasUtils.getLastPoint()
   CanvasUtils.connectPointsByPixel(lastPoint, point)
   CanvasUtils.saveLastPoint(point)
+  CanvasUtils.saveLastSeriesPoints(point)
 })
+
+$canvas.on('touchend', function (event) {
+  CanvasUtils.saveImageDataHistory()
+  updateControls()
+})
+
+$backButton.on('click', function (event) {
+  let currentHistoryIndex = CanvasUtils.getCurrentHistoryIndex()
+  if (currentHistoryIndex < 0) return
+  currentHistoryIndex --
+  CanvasUtils.setCurrentHistoryIndex(currentHistoryIndex)
+  updateControls()
+})
+
+$forwardButton.on('click', function (event) {
+  const imageDataHistory = CanvasUtils.getImageDataHistory()
+  let currentHistoryIndex = CanvasUtils.getCurrentHistoryIndex()
+  if (currentHistoryIndex >= imageDataHistory.length - 1) return
+  currentHistoryIndex ++
+  CanvasUtils.setCurrentHistoryIndex(currentHistoryIndex)
+  updateControls()
+})
+
+$smoothButton.on('click', function (event) {
+  CanvasUtils.smoothLastLine()
+})
+
+/* Init */
+CanvasUtils.initCanvas()
+CanvasUtils.setLineStyles()

@@ -11,10 +11,20 @@
       font-family: PingFangSC-Light;
     }
     #canvas {display: block;}
+    #control {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+    }
   </style>
 </head>
 <body>
   <canvas id="canvas"></canvas>
+  <div id="control">
+    <button id="back" disabled>Back</button>
+    <button id="forward" disabled>Forward</button>
+    <button id="smooth">Smooth</button>
+  </div>
 
   <script src="/libs/jquery.min.js"></script>
   <script src="/libs/geometry-utils.js"></script>
