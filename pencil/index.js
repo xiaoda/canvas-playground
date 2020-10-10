@@ -57,6 +57,7 @@ $forwardButton.on('click', function (event) {
 
 $smoothButton.on('click', function (event) {
   CanvasUtils.smoothLastLine()
+  CanvasUtils.saveImageDataHistory()
   CanvasUtils.clearLastSeriesPoints()
   updateControls()
 })
