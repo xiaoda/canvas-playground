@@ -1,4 +1,4 @@
 # Canvas Playground
 
 ## Pencil
-[Demo](https://canvas.xiaoda.pro/pencil/)
+A pencil canvas on iPad, with original algorithms. [Link](pencil/README.md)
