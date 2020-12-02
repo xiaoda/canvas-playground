@@ -5,6 +5,7 @@ const USE_PENCIL = 0
 const $canvas = $('#canvas')
 const canvas = $canvas.get(0)
 const ctx = canvas.getContext('2d')
+const $clearButton = $('#clear')
 const $backButton = $('#back')
 const $forwardButton = $('#forward')
 const $smoothButton = $('#smooth')
@@ -37,6 +38,11 @@ $canvas.on('touchend', function (event) {
   updateControls()
 })
 
+$clearButton.on('click', function (event) {
+  CanvasUtils.init()
+  updateControls('init')
+})
+
 $backButton.on('click', function (event) {
   let currentHistoryIndex = CanvasUtils.getCurrentHistoryIndex()
   if (currentHistoryIndex < 0) return
@@ -63,28 +69,25 @@ $smoothButton.on('click', function (event) {
 })
 
 /* Functions */
-function updateControls () {
+function updateControls (timing) {
   const imageDataHistory = CanvasUtils.getImageDataHistory()
   const currentHistoryIndex = CanvasUtils.getCurrentHistoryIndex()
   const disabled = 'disabled'
-  if (currentHistoryIndex > 0) {
-    $backButton.removeAttr('disabled')
-  } else {
+  timing === 'init' ?
+    $clearButton.attr({disabled}) :
+    $clearButton.removeAttr('disabled')
+  currentHistoryIndex > 0 ?
+    $backButton.removeAttr('disabled') :
     $backButton.attr({disabled})
-  }
-  if (currentHistoryIndex < imageDataHistory.length - 1) {
-    $forwardButton.removeAttr('disabled')
-  } else {
+  currentHistoryIndex < imageDataHistory.length - 1 ?
+    $forwardButton.removeAttr('disabled') :
     $forwardButton.attr({disabled})
-  }
   const lastSeriesPoints = CanvasUtils.getLastSeriesPoints()
-  if (lastSeriesPoints.length) {
-    $smoothButton.removeAttr('disabled')
-  } else {
+  lastSeriesPoints.length ?
+    $smoothButton.removeAttr('disabled') :
     $smoothButton.attr({disabled})
-  }
 }
 
 /* Init */
-CanvasUtils.initCanvas()
+CanvasUtils.init()
 CanvasUtils.setLineStyles()

@@ -4,13 +4,18 @@ const LINE_WIDTH = 3
 const SHADOW_RANGE = 3
 
 /* Temp */
-let _imageDataHistory = []
-let _currentHistoryIndex = 0
-let _lastPoint = []
-let _lastSeriesPoints = []
+let _imageDataHistory
+let _currentHistoryIndex
+let _lastPoint
+let _lastSeriesPoints
 
 const CanvasUtils = {
-  initCanvas () {
+  init () {
+    _imageDataHistory = []
+    _currentHistoryIndex = 0
+    _lastPoint = []
+    _lastSeriesPoints = []
+
     canvas.style.width = `${window.innerWidth}px`
     canvas.style.height = `${window.innerHeight}px`
     canvas.width = window.innerWidth * CANVAS_RATIO
@@ -200,9 +205,8 @@ const CanvasUtils = {
       return newPoints
     }
 
-    processedSeriesPoints = GeometryUtils.chain(
-      processedSeriesPoints,
-      _processSeriesPoints, _processSeriesPoints
+    processedSeriesPoints = GeometryUtils.repeatedlyCall(
+      _processSeriesPoints, 15, processedSeriesPoints
     )
     const imageDataHistory = this.getImageDataHistory()
     const imageData = imageDataHistory[imageDataHistory.length - 2]

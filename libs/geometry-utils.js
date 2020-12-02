@@ -71,6 +71,10 @@ const GeometryUtils = {
     )
   },
 
+  clamp (min, max, x) {
+    return Math.min(Math.max(x, min), max)
+  },
+
   mix (a, b, ratio) {
     return a * (1 - ratio) + b * ratio
   },
@@ -81,10 +85,6 @@ const GeometryUtils = {
 
   map (a, b, x) {
     return x / a * b
-  },
-
-  clamp (min, max, x) {
-    return Math.min(Math.max(x, min), max)
   },
 
   formatRadian (radian) {
@@ -131,7 +131,7 @@ const GeometryUtils = {
 
   throttle (fun, interval) {
     let lastTime, timeoutHandler
-    return function (args) {
+    return function () {
       const _this = this
       const _args = arguments
       let now = +new Date()
@@ -181,6 +181,13 @@ const GeometryUtils = {
         data = fun(data)
       }
     })
+    return data
+  },
+
+  repeatedlyCall (fun, times, data, ...args) {
+    for (let i = 0; i < times; i++) {
+      data = fun(data, ...args)
+    }
     return data
   },
 
@@ -485,10 +492,10 @@ const GeometryUtils = {
   getDistanceFromPointToLineSegment (
     vertexA, vertexB, point
   ) {
-    const distanceFromVertexA = this.getDistanceBetweenPoints(
+    const distanceToVertexA = this.getDistanceBetweenPoints(
       point, vertexA
     )
-    const distanceFromVertexB = this.getDistanceBetweenPoints(
+    const distanceToVertexB = this.getDistanceBetweenPoints(
       point, vertexB
     )
     let distance
@@ -499,8 +506,8 @@ const GeometryUtils = {
         ) ?
         Math.abs(point[0] - vertexA[0]) :
         Math.min(
-          distanceFromVertexA,
-          distanceFromVertexB
+          distanceToVertexA,
+          distanceToVertexB
         )
       )
     } else if (vertexA[1] === vertexB[1]) {
@@ -510,8 +517,8 @@ const GeometryUtils = {
         ) ?
         Math.abs(point[1] - vertexA[1]) :
         Math.min(
-          distanceFromVertexA,
-          distanceFromVertexB
+          distanceToVertexA,
+          distanceToVertexB
         )
       )
     } else {
@@ -533,8 +540,8 @@ const GeometryUtils = {
           point, crossPoint
         ) :
         Math.min(
-          distanceFromVertexA,
-          distanceFromVertexB
+          distanceToVertexA,
+          distanceToVertexB
         )
       )
     }
