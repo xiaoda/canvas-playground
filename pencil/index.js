@@ -9,6 +9,7 @@ const $clearButton = $('#clear')
 const $backButton = $('#back')
 const $forwardButton = $('#forward')
 const $smoothButton = $('#smooth')
+const $straightButton = $('#straight')
 
 /* Events */
 $canvas.on('touchstart', function (event) {
@@ -33,17 +34,17 @@ $canvas.on('touchmove', function (event) {
   CanvasUtils.saveLastSeriesPoints(point)
 })
 
-$canvas.on('touchend', function (event) {
+$canvas.on('touchend', function () {
   CanvasUtils.saveImageDataHistory()
   updateControls()
 })
 
-$clearButton.on('click', function (event) {
+$clearButton.on('click', function () {
   CanvasUtils.init()
   updateControls('init')
 })
 
-$backButton.on('click', function (event) {
+$backButton.on('click', function () {
   let currentHistoryIndex = CanvasUtils.getCurrentHistoryIndex()
   if (currentHistoryIndex < 0) return
   currentHistoryIndex --
@@ -52,7 +53,7 @@ $backButton.on('click', function (event) {
   updateControls()
 })
 
-$forwardButton.on('click', function (event) {
+$forwardButton.on('click', function () {
   const imageDataHistory = CanvasUtils.getImageDataHistory()
   let currentHistoryIndex = CanvasUtils.getCurrentHistoryIndex()
   if (currentHistoryIndex >= imageDataHistory.length - 1) return
@@ -61,8 +62,15 @@ $forwardButton.on('click', function (event) {
   updateControls()
 })
 
-$smoothButton.on('click', function (event) {
-  CanvasUtils.smoothLastLine()
+$smoothButton.on('click', function () {
+  CanvasUtils.smoothenLastLine()
+  CanvasUtils.saveImageDataHistory()
+  CanvasUtils.clearLastSeriesPoints()
+  updateControls()
+})
+
+$straightButton.on('click', function () {
+  CanvasUtils.straightenLastLine()
   CanvasUtils.saveImageDataHistory()
   CanvasUtils.clearLastSeriesPoints()
   updateControls()
@@ -83,9 +91,13 @@ function updateControls (timing) {
     $forwardButton.removeAttr('disabled') :
     $forwardButton.attr({disabled})
   const lastSeriesPoints = CanvasUtils.getLastSeriesPoints()
-  lastSeriesPoints.length ?
-    $smoothButton.removeAttr('disabled') :
+  if (lastSeriesPoints.length) {
+    $smoothButton.removeAttr('disabled')
+    $straightButton.removeAttr('disabled')
+  } else {
     $smoothButton.attr({disabled})
+    $straightButton.attr({disabled})
+  }
 }
 
 /* Init */

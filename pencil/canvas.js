@@ -1,6 +1,6 @@
 /* Constants */
 const CANVAS_RATIO = 2
-const LINE_WIDTH = 3
+const LINE_WIDTH = 2
 const SHADOW_RANGE = 3
 
 /* Temp */
@@ -131,7 +131,7 @@ const CanvasUtils = {
           (distanceLimit - distanceRange)
         )
       }
-      grayScale *= 0.9
+      grayScale *= .9
       const grayValue = Number.parseInt(
         (1 - grayScale) * 255
       )
@@ -174,8 +174,8 @@ const CanvasUtils = {
     )
   },
 
-  smoothLastLine () {
-    let processedSeriesPoints = this.getLastSeriesPoints()
+  smoothenLastLine () {
+    let processingSeriesPoints = this.getLastSeriesPoints()
 
     function _processSeriesPoints (points) {
       const ratio = [.3, .4, .3]
@@ -205,15 +205,90 @@ const CanvasUtils = {
       return newPoints
     }
 
-    processedSeriesPoints = GeometryUtils.repeatedlyCall(
-      _processSeriesPoints, 15, processedSeriesPoints
+    processingSeriesPoints = GeometryUtils.repeatedlyCall(
+      _processSeriesPoints, 15, processingSeriesPoints
     )
     const imageDataHistory = this.getImageDataHistory()
     const imageData = imageDataHistory[imageDataHistory.length - 2]
     ctx.putImageData(imageData, 0, 0)
-    processedSeriesPoints.forEach((point, index) => {
+    processingSeriesPoints.forEach((point, index) => {
       if (index < 1) return
-      const lastPoint = processedSeriesPoints[index - 1]
+      const lastPoint = processingSeriesPoints[index - 1]
+      this.connectPointsByPixel(lastPoint, point)
+    })
+  },
+
+  straightenLastLine () {
+    /* Part A */
+    const lastSeriesPoints = this.getLastSeriesPoints()
+    const pointsRateOfChange = []
+    lastSeriesPoints.forEach((point, index) => {
+      if (
+        index < 1 ||
+        index >= lastSeriesPoints.length - 1
+      ) return
+      const lastPoint = lastSeriesPoints[index - 1]
+      const nextPoint = lastSeriesPoints[index + 1]
+      const lastPointDistance =
+        GeometryUtils.getDistanceBetweenPoints(
+          point, lastPoint
+        )
+      const nextPointDistance =
+        GeometryUtils.getDistanceBetweenPoints(
+          point, nextPoint
+        )
+      const rateX = (
+        (nextPoint[0] - point[0]) / nextPointDistance -
+        (point[0] - lastPoint[0]) / lastPointDistance
+      )
+      const rateY = (
+        (nextPoint[1] - point[1]) / nextPointDistance -
+        (point[1] - lastPoint[1]) / lastPointDistance
+      )
+      const direction = (
+        rateX === 0 && rateY === 0 ? 1 : (
+          Math.abs(rateX) > Math.abs(rateY) ?
+          rateX / Math.abs(rateX) :
+          rateY / Math.abs(rateY)
+        )
+      )
+      const rate = (rateX ** 2 + rateY ** 2) ** .5 * direction
+      pointsRateOfChange.push(rate)
+    })
+
+    /* Part B */
+    const pointsAccumulatedRate = []
+    pointsRateOfChange.forEach((rate, index) => {
+      if (
+        index < 2 ||
+        index >= pointsRateOfChange.length - 2
+      ) return
+      const last2ndRate = pointsRateOfChange[index - 2]
+      const lastRate = pointsRateOfChange[index - 1]
+      const nextRate = pointsRateOfChange[index + 1]
+      const next2ndRate = pointsRateOfChange[index + 2]
+      const accumulatedRate = Math.abs(
+        last2ndRate + lastRate + rate + nextRate + next2ndRate
+      )
+      pointsAccumulatedRate.push(accumulatedRate)
+    })
+
+    /* Part C */
+    const sortedPointsAccumulatedRate = GeometryUtils.clone(
+      pointsAccumulatedRate.sort((a, b) => b - a)
+    )
+    console.log(sortedPointsAccumulatedRate)
+    sortedPointsAccumulatedRate.forEach(rate => {
+      // todo
+    })
+
+    /* Finale */
+    const imageDataHistory = this.getImageDataHistory()
+    const imageData = imageDataHistory[imageDataHistory.length - 2]
+    ctx.putImageData(imageData, 0, 0)
+    lastSeriesPoints.forEach((point, index) => {
+      if (index < 1) return
+      const lastPoint = lastSeriesPoints[index - 1]
       this.connectPointsByPixel(lastPoint, point)
     })
   }
