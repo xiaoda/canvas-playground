@@ -206,7 +206,7 @@ const CanvasUtils = {
     }
 
     processingSeriesPoints = GeometryUtils.repeatedlyCall(
-      _processSeriesPoints, 15, processingSeriesPoints
+      _processSeriesPoints, 10, processingSeriesPoints
     )
     const imageDataHistory = this.getImageDataHistory()
     const imageData = imageDataHistory[imageDataHistory.length - 2]
@@ -258,37 +258,77 @@ const CanvasUtils = {
 
     /* Part B */
     const pointsAccumulatedRate = []
+    const accumlatedRange = 3
     pointsRateOfChange.forEach((rate, index) => {
+      let accumulatedRate = 0
       if (
-        index < 2 ||
-        index >= pointsRateOfChange.length - 2
+        index < accumlatedRange ||
+        index >= pointsRateOfChange.length - accumlatedRange
       ) return
-      const last2ndRate = pointsRateOfChange[index - 2]
-      const lastRate = pointsRateOfChange[index - 1]
-      const nextRate = pointsRateOfChange[index + 1]
-      const next2ndRate = pointsRateOfChange[index + 2]
-      const accumulatedRate = Math.abs(
-        last2ndRate + lastRate + rate + nextRate + next2ndRate
-      )
+      for (
+        let i = accumlatedRange * -1;
+        i <= accumlatedRange;
+        i++
+      ) {
+        accumulatedRate += pointsRateOfChange[index + i]
+      }
+      accumulatedRate = Math.abs(accumulatedRate)
       pointsAccumulatedRate.push(accumulatedRate)
     })
 
     /* Part C */
-    const sortedPointsAccumulatedRate = GeometryUtils.clone(
-      pointsAccumulatedRate.sort((a, b) => b - a)
-    )
-    console.log(sortedPointsAccumulatedRate)
-    sortedPointsAccumulatedRate.forEach(rate => {
-      // todo
-    })
+    const sortedPointsAccumulatedRate = GeometryUtils
+      .clone(pointsAccumulatedRate)
+      .sort((a, b) => b - a)
+    const verticesIndex = []
+    for (
+      let i = 0;
+      i < sortedPointsAccumulatedRate.length - 1;
+      i++
+    ) {
+      const rate = sortedPointsAccumulatedRate[i]
+      const index = pointsAccumulatedRate
+        .findIndex(r => r === rate)
+      // if (rate < 1) break
+      if (verticesIndex.length) {
+        const nearbyRates = []
+        for (
+          let j = index - accumlatedRange;
+          j <= index + accumlatedRange;
+          j++
+        ) {
+          if (
+            j < 0 ||
+            j > pointsAccumulatedRate.length - 1 ||
+            j === index
+          ) continue
+          const nearbyRate = pointsAccumulatedRate[j]
+          nearbyRates.push(nearbyRate)
+        }
+        if (
+          nearbyRates.some(nearbyRate => nearbyRate > rate)
+        ) continue
+      }
+      verticesIndex.push(index)
+    }
+    const vertices = [
+      lastSeriesPoints[0],
+      ...verticesIndex
+        .sort((a, b) => a - b)
+        .map(index => {
+          const tempIndex = index + accumlatedRange + 1
+          return lastSeriesPoints[tempIndex]
+        }),
+      lastSeriesPoints[lastSeriesPoints.length - 1]
+    ]
 
     /* Finale */
     const imageDataHistory = this.getImageDataHistory()
     const imageData = imageDataHistory[imageDataHistory.length - 2]
     ctx.putImageData(imageData, 0, 0)
-    lastSeriesPoints.forEach((point, index) => {
+    vertices.forEach((point, index) => {
       if (index < 1) return
-      const lastPoint = lastSeriesPoints[index - 1]
+      const lastPoint = vertices[index - 1]
       this.connectPointsByPixel(lastPoint, point)
     })
   }
