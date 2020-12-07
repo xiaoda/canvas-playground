@@ -1,7 +1,7 @@
 import common from './common.js'
 import connectPointsByPixel from './connect-points-by-pixel.js'
 
-export default _ => {
+export default function straightenLastLine () {
   /* Part A */
   const lastSeriesPoints = common.getLastSeriesPoints()
   const pointsRateOfChange = []
@@ -40,6 +40,7 @@ export default _ => {
   })
 
   /* Part B */
+  /*
   const pointsAccumulatedRate = []
   const accumlatedRange = 3
   pointsRateOfChange.forEach((rate, index) => {
@@ -58,34 +59,35 @@ export default _ => {
     accumulatedRate = Math.abs(accumulatedRate)
     pointsAccumulatedRate.push(accumulatedRate)
   })
+  */
 
   /* Part C */
-  const sortedPointsAccumulatedRate = GeometryUtils
-    .clone(pointsAccumulatedRate)
+  const sortedPointsRateOfChange = GeometryUtils
+    .clone(pointsRateOfChange)
     .sort((a, b) => b - a)
   const verticesIndex = []
+  const nearbyRange = 3
   for (
     let i = 0;
-    i < sortedPointsAccumulatedRate.length - 1;
+    i < sortedPointsRateOfChange.length - 1;
     i++
   ) {
-    const rate = sortedPointsAccumulatedRate[i]
-    const index = pointsAccumulatedRate
+    const rate = sortedPointsRateOfChange[i]
+    const index = pointsRateOfChange
       .findIndex(r => r === rate)
-    // if (rate < 1) break
     if (verticesIndex.length) {
       const nearbyRates = []
       for (
-        let j = index - accumlatedRange;
-        j <= index + accumlatedRange;
+        let j = index - nearbyRange;
+        j <= index + nearbyRange;
         j++
       ) {
         if (
           j < 0 ||
-          j > pointsAccumulatedRate.length - 1 ||
+          j > pointsRateOfChange.length - 1 ||
           j === index
         ) continue
-        const nearbyRate = pointsAccumulatedRate[j]
+        const nearbyRate = pointsRateOfChange[j]
         nearbyRates.push(nearbyRate)
       }
       if (
@@ -99,11 +101,14 @@ export default _ => {
     ...verticesIndex
       .sort((a, b) => a - b)
       .map(index => {
-        const tempIndex = index + accumlatedRange + 1
+        const tempIndex = index + 1
         return lastSeriesPoints[tempIndex]
       }),
     lastSeriesPoints[lastSeriesPoints.length - 1]
   ]
+
+  /* Part D */
+  // todo
 
   /* Finale */
   const imageDataHistory = common.getImageDataHistory()

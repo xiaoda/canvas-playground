@@ -39,7 +39,9 @@ function getGrayValueByDistance (distance) {
   return grayValue
 }
 
-export default (pointA, pointB) => {
+export default function connectPointsByPixel (
+  pointA, pointB
+) {
   if (!pointA) return
   else if (!pointB) pointB = pointA
 
