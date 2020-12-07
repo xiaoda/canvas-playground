@@ -1,10 +1,12 @@
+import CanvasUtils from './canvas.js'
+
 /* Configs */
 const USE_PENCIL = 0
 
 /* Constants */
 const $canvas = $('#canvas')
-const canvas = $canvas.get(0)
-const ctx = canvas.getContext('2d')
+window.canvas = $canvas.get(0)
+window.ctx = canvas.getContext('2d')
 const $clearButton = $('#clear')
 const $backButton = $('#back')
 const $forwardButton = $('#forward')
