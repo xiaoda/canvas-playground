@@ -1,6 +1,38 @@
 import common from './common.js'
 import connectPointsByPixel from './connect-points-by-pixel.js'
 
+function getRateOfChange (
+  lastPoint, point, nextPoint
+) {
+  const lastPointDistance =
+    GeometryUtils.getDistanceBetweenPoints(
+      point, lastPoint
+    )
+  const nextPointDistance =
+    GeometryUtils.getDistanceBetweenPoints(
+      point, nextPoint
+    )
+  const rateX = (
+    (nextPoint[0] - point[0]) / nextPointDistance -
+    (point[0] - lastPoint[0]) / lastPointDistance
+  )
+  const rateY = (
+    (nextPoint[1] - point[1]) / nextPointDistance -
+    (point[1] - lastPoint[1]) / lastPointDistance
+  )
+  /*
+  const direction = (
+    rateX === 0 && rateY === 0 ? 1 : (
+      Math.abs(rateX) > Math.abs(rateY) ?
+      rateX / Math.abs(rateX) :
+      rateY / Math.abs(rateY)
+    )
+  )
+  */
+  const rate = (rateX ** 2 + rateY ** 2) ** .5
+  return rate
+}
+
 export default function straightenLastLine () {
   /* Part A */
   const lastSeriesPoints = common.getLastSeriesPoints()
@@ -12,30 +44,9 @@ export default function straightenLastLine () {
     ) return
     const lastPoint = lastSeriesPoints[index - 1]
     const nextPoint = lastSeriesPoints[index + 1]
-    const lastPointDistance =
-      GeometryUtils.getDistanceBetweenPoints(
-        point, lastPoint
-      )
-    const nextPointDistance =
-      GeometryUtils.getDistanceBetweenPoints(
-        point, nextPoint
-      )
-    const rateX = (
-      (nextPoint[0] - point[0]) / nextPointDistance -
-      (point[0] - lastPoint[0]) / lastPointDistance
+    const rate = getRateOfChange(
+      lastPoint, point, nextPoint
     )
-    const rateY = (
-      (nextPoint[1] - point[1]) / nextPointDistance -
-      (point[1] - lastPoint[1]) / lastPointDistance
-    )
-    const direction = (
-      rateX === 0 && rateY === 0 ? 1 : (
-        Math.abs(rateX) > Math.abs(rateY) ?
-        rateX / Math.abs(rateX) :
-        rateY / Math.abs(rateY)
-      )
-    )
-    const rate = (rateX ** 2 + rateY ** 2) ** .5 * direction
     pointsRateOfChange.push(rate)
   })
 
@@ -62,19 +73,14 @@ export default function straightenLastLine () {
   */
 
   /* Part C */
+  /*
   const sortedPointsRateOfChange = GeometryUtils
     .clone(pointsRateOfChange)
     .sort((a, b) => b - a)
+  */
   const verticesIndex = []
-  const nearbyRange = 3
-  for (
-    let i = 0;
-    i < sortedPointsRateOfChange.length - 1;
-    i++
-  ) {
-    const rate = sortedPointsRateOfChange[i]
-    const index = pointsRateOfChange
-      .findIndex(r => r === rate)
+  const nearbyRange = 2
+  pointsRateOfChange.forEach((rate, index) => {
     if (verticesIndex.length) {
       const nearbyRates = []
       for (
@@ -91,32 +97,55 @@ export default function straightenLastLine () {
         nearbyRates.push(nearbyRate)
       }
       if (
-        nearbyRates.some(nearbyRate => nearbyRate > rate)
-      ) continue
+        nearbyRates.some(nearbyRate => nearbyRate >= rate)
+      ) return
     }
     verticesIndex.push(index)
-  }
+  })
   const vertices = [
     lastSeriesPoints[0],
-    ...verticesIndex
-      .sort((a, b) => a - b)
-      .map(index => {
-        const tempIndex = index + 1
-        return lastSeriesPoints[tempIndex]
-      }),
+    ...verticesIndex.map(index => {
+      const tempIndex = index + 1
+      return lastSeriesPoints[tempIndex]
+    }),
     lastSeriesPoints[lastSeriesPoints.length - 1]
   ]
 
   /* Part D */
-  // todo
+  const verticesRateOfChange = []
+  const obviousVerticesIndex = []
+  vertices.forEach((vertex, index) => {
+    if (
+      index < 1 ||
+      index >= vertices.length - 1
+    ) return
+    const lastVertex = vertices[index - 1]
+    const nextVertex = vertices[index + 1]
+    const rate = getRateOfChange(
+      lastVertex, vertex, nextVertex
+    )
+    verticesRateOfChange.push(rate)
+  })
+  verticesRateOfChange.forEach((rate, index) => {
+    if (rate < .8) return
+    obviousVerticesIndex.push(index)
+  })
+  const obviousVertices = [
+    lastSeriesPoints[0],
+    ...obviousVerticesIndex.map(index => {
+      const tempIndex = index + 1
+      return vertices[tempIndex]
+    }),
+    lastSeriesPoints[lastSeriesPoints.length - 1]
+  ]
 
   /* Finale */
   const imageDataHistory = common.getImageDataHistory()
   const imageData = imageDataHistory[imageDataHistory.length - 2]
   ctx.putImageData(imageData, 0, 0)
-  vertices.forEach((point, index) => {
+  obviousVertices.forEach((point, index) => {
     if (index < 1) return
-    const lastPoint = vertices[index - 1]
+    const lastPoint = obviousVertices[index - 1]
     connectPointsByPixel(lastPoint, point)
   })
 }
