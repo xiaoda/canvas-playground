@@ -20,7 +20,6 @@ function getRateOfChange (
     (nextPoint[1] - point[1]) / nextPointDistance -
     (point[1] - lastPoint[1]) / lastPointDistance
   )
-  /*
   const direction = (
     rateX === 0 && rateY === 0 ? 1 : (
       Math.abs(rateX) > Math.abs(rateY) ?
@@ -28,8 +27,7 @@ function getRateOfChange (
       rateY / Math.abs(rateY)
     )
   )
-  */
-  const rate = (rateX ** 2 + rateY ** 2) ** .5
+  const rate = (rateX ** 2 + rateY ** 2) ** .5 * direction
   return rate
 }
 
@@ -51,9 +49,8 @@ export default function straightenLastLine () {
   })
 
   /* Part B */
-  /*
   const pointsAccumulatedRate = []
-  const accumlatedRange = 3
+  const accumlatedRange = 4
   pointsRateOfChange.forEach((rate, index) => {
     let accumulatedRate = 0
     if (
@@ -70,43 +67,59 @@ export default function straightenLastLine () {
     accumulatedRate = Math.abs(accumulatedRate)
     pointsAccumulatedRate.push(accumulatedRate)
   })
-  */
 
   /* Part C */
-  /*
-  const sortedPointsRateOfChange = GeometryUtils
-    .clone(pointsRateOfChange)
-    .sort((a, b) => b - a)
-  */
   const verticesIndex = []
-  const nearbyRange = 2
-  pointsRateOfChange.forEach((rate, index) => {
+  const nearbyRange = 4
+  pointsAccumulatedRate.forEach((accumulatedRate, index) => {
+    if (Math.abs(accumulatedRate) < .7) return
     if (verticesIndex.length) {
       const nearbyRates = []
       for (
-        let j = index - nearbyRange;
-        j <= index + nearbyRange;
-        j++
+        let i = index - nearbyRange;
+        i <= index + nearbyRange;
+        i++
       ) {
         if (
-          j < 0 ||
-          j > pointsRateOfChange.length - 1 ||
-          j === index
+          i < 0 ||
+          i > pointsAccumulatedRate.length - 1 ||
+          i === index
         ) continue
-        const nearbyRate = pointsRateOfChange[j]
+        const nearbyRate = pointsAccumulatedRate[i]
         nearbyRates.push(nearbyRate)
       }
       if (
-        nearbyRates.some(nearbyRate => nearbyRate >= rate)
+        nearbyRates.some(nearbyRate => {
+          return (
+            Math.abs(nearbyRate) >=
+            Math.abs(accumulatedRate)
+          )
+        })
       ) return
     }
-    verticesIndex.push(index)
+    const possibleRates = []
+    const possibleRatesIndex = []
+    for (
+      let i = accumlatedRange * -1;
+      i <= accumlatedRange;
+      i++
+    ) {
+      const tempIndex = accumlatedRange + index + i
+      const rate = pointsRateOfChange[tempIndex]
+      possibleRates.push(Math.abs(rate))
+      possibleRatesIndex.push(tempIndex)
+    }
+    const biggestRate = Math.max(...possibleRates)
+    const biggestRateTempIndex = possibleRates
+      .findIndex(rate => rate === biggestRate)
+    const biggestRateIndex = possibleRatesIndex[biggestRateTempIndex]
+    const vertexIndex = biggestRateIndex + 1
+    verticesIndex.push(vertexIndex)
   })
   const vertices = [
     lastSeriesPoints[0],
     ...verticesIndex.map(index => {
-      const tempIndex = index + 1
-      return lastSeriesPoints[tempIndex]
+      return lastSeriesPoints[index]
     }),
     lastSeriesPoints[lastSeriesPoints.length - 1]
   ]
@@ -127,14 +140,14 @@ export default function straightenLastLine () {
     verticesRateOfChange.push(rate)
   })
   verticesRateOfChange.forEach((rate, index) => {
-    if (rate < .8) return
-    obviousVerticesIndex.push(index)
+    if (Math.abs(rate) < .5) return
+    const vertexIndex = index + 1
+    obviousVerticesIndex.push(vertexIndex)
   })
   const obviousVertices = [
     lastSeriesPoints[0],
     ...obviousVerticesIndex.map(index => {
-      const tempIndex = index + 1
-      return vertices[tempIndex]
+      return vertices[index]
     }),
     lastSeriesPoints[lastSeriesPoints.length - 1]
   ]
