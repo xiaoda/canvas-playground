@@ -72,7 +72,7 @@ export default function straightenLastLine () {
   const verticesIndex = []
   const nearbyRange = 4
   pointsAccumulatedRate.forEach((accumulatedRate, index) => {
-    if (Math.abs(accumulatedRate) < .7) return
+    if (Math.abs(accumulatedRate) < .5) return
     if (verticesIndex.length) {
       const nearbyRates = []
       for (
@@ -91,7 +91,7 @@ export default function straightenLastLine () {
       if (
         nearbyRates.some(nearbyRate => {
           return (
-            Math.abs(nearbyRate) >=
+            Math.abs(nearbyRate) >
             Math.abs(accumulatedRate)
           )
         })
@@ -114,6 +114,7 @@ export default function straightenLastLine () {
       .findIndex(rate => rate === biggestRate)
     const biggestRateIndex = possibleRatesIndex[biggestRateTempIndex]
     const vertexIndex = biggestRateIndex + 1
+    if (verticesIndex.includes(vertexIndex)) return
     verticesIndex.push(vertexIndex)
   })
   const vertices = [
@@ -140,7 +141,7 @@ export default function straightenLastLine () {
     verticesRateOfChange.push(rate)
   })
   verticesRateOfChange.forEach((rate, index) => {
-    if (Math.abs(rate) < .5) return
+    if (Math.abs(rate) < .3) return
     const vertexIndex = index + 1
     obviousVerticesIndex.push(vertexIndex)
   })

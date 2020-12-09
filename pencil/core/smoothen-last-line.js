@@ -2,7 +2,7 @@ import common from './common.js'
 import connectPointsByPixel from './connect-points-by-pixel.js'
 
 function processSeriesPoints (points) {
-  const ratio = [.4, .2, .4]
+  const ratio = [.3, .4, .3]
   let newPoints = []
   points.forEach((point, index) => {
     let newPoint
