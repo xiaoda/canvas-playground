@@ -1,14 +1,14 @@
 import config from '../config.js'
 
-const distanceRange = config.lineWidth / 2
-const distanceLimit = distanceRange + config.shadowRange
+const DISTANCE_RANGE = config.LINE_WIDTH / 2
+const DISTANCE_LIMIT = DISTANCE_RANGE + config.SHADOW_RANGE
 
 function getBoundaries (...coordinates) {
   const boundaries = Array(...coordinates)
     .sort((a, b) => a - b)
     .map((x, index) => {
       const boundary = (
-        x + (config.lineWidth / 2 + config.shadowRange) * (index ? 1 : -1)
+        x + (config.LINE_WIDTH / 2 + config.SHADOW_RANGE) * (index ? 1 : -1)
       )
       const intBoundary = (
         index ?
@@ -22,14 +22,14 @@ function getBoundaries (...coordinates) {
 
 function getGrayValueByDistance (distance) {
   let grayScale
-  if (distance > distanceLimit) {
+  if (distance > DISTANCE_LIMIT) {
     grayScale = 0
-  } else if (distance < distanceRange) {
+  } else if (distance < DISTANCE_RANGE) {
     grayScale = 1
   } else {
     grayScale = (
-      (distanceLimit - distance) /
-      (distanceLimit - distanceRange)
+      (DISTANCE_LIMIT - distance) /
+      (DISTANCE_LIMIT - DISTANCE_RANGE)
     )
   }
   grayScale *= .9

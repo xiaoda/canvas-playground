@@ -1,6 +1,11 @@
 import common from './common.js'
 import connectPointsByPixel from './connect-points-by-pixel.js'
 
+const ACCUMULATED_RANGE = 4
+const NEARBY_RANGE = 4
+const ACCUMULATED_RATE_LIMIT = .5
+const VERTICES_RATE_LIMIT = .3
+
 function getRateOfChange (
   lastPoint, point, nextPoint
 ) {
@@ -50,16 +55,15 @@ export default function straightenLastLine () {
 
   /* Part B */
   const pointsAccumulatedRate = []
-  const accumlatedRange = 4
   pointsRateOfChange.forEach((rate, index) => {
     let accumulatedRate = 0
     if (
-      index < accumlatedRange ||
-      index >= pointsRateOfChange.length - accumlatedRange
+      index < ACCUMULATED_RANGE ||
+      index >= pointsRateOfChange.length - ACCUMULATED_RANGE
     ) return
     for (
-      let i = accumlatedRange * -1;
-      i <= accumlatedRange;
+      let i = ACCUMULATED_RANGE * -1;
+      i <= ACCUMULATED_RANGE;
       i++
     ) {
       accumulatedRate += pointsRateOfChange[index + i]
@@ -70,14 +74,15 @@ export default function straightenLastLine () {
 
   /* Part C */
   const verticesIndex = []
-  const nearbyRange = 4
   pointsAccumulatedRate.forEach((accumulatedRate, index) => {
-    if (Math.abs(accumulatedRate) < .5) return
+    if (
+      Math.abs(accumulatedRate) < ACCUMULATED_RATE_LIMIT
+    ) return
     if (verticesIndex.length) {
       const nearbyRates = []
       for (
-        let i = index - nearbyRange;
-        i <= index + nearbyRange;
+        let i = index - NEARBY_RANGE;
+        i <= index + NEARBY_RANGE;
         i++
       ) {
         if (
@@ -100,11 +105,11 @@ export default function straightenLastLine () {
     const possibleRates = []
     const possibleRatesIndex = []
     for (
-      let i = accumlatedRange * -1;
-      i <= accumlatedRange;
+      let i = ACCUMULATED_RANGE * -1;
+      i <= ACCUMULATED_RANGE;
       i++
     ) {
-      const tempIndex = accumlatedRange + index + i
+      const tempIndex = ACCUMULATED_RANGE + index + i
       const rate = pointsRateOfChange[tempIndex]
       possibleRates.push(Math.abs(rate))
       possibleRatesIndex.push(tempIndex)
@@ -141,7 +146,7 @@ export default function straightenLastLine () {
     verticesRateOfChange.push(rate)
   })
   verticesRateOfChange.forEach((rate, index) => {
-    if (Math.abs(rate) < .3) return
+    if (Math.abs(rate) < VERTICES_RATE_LIMIT) return
     const vertexIndex = index + 1
     obviousVerticesIndex.push(vertexIndex)
   })

@@ -1,21 +1,21 @@
 import config from '../config.js'
 
-let _imageDataHistory
-let _currentHistoryIndex
-let _lastPoint
-let _lastSeriesPoints
+let IMAGE_DATA_HISTORY
+let CURRENT_HISTORY_INDEX
+let LAST_POINT
+let LAST_SERIES_POINTS
 
 export default {
   init () {
-    _imageDataHistory = []
-    _currentHistoryIndex = 0
-    _lastPoint = []
-    _lastSeriesPoints = []
+    IMAGE_DATA_HISTORY = []
+    CURRENT_HISTORY_INDEX = 0
+    LAST_POINT = []
+    LAST_SERIES_POINTS = []
 
     canvas.style.width = `${window.innerWidth}px`
     canvas.style.height = `${window.innerHeight}px`
-    canvas.width = window.innerWidth * config.canvasRatio
-    canvas.height = window.innerHeight * config.canvasRatio
+    canvas.width = window.innerWidth * config.CANVAS_RATIO
+    canvas.height = window.innerHeight * config.CANVAS_RATIO
     ctx.fillStyle = '#FFF'
     ctx.fillRect(0, 0, canvas.width, canvas.height)
     this.saveImageDataHistory()
@@ -24,7 +24,7 @@ export default {
   setLineStyles (options = {}) {
     ctx.lineWidth = (
       options.lineWidth ||
-      (config.lineWidth + config.shadowRange)
+      (config.LINE_WIDTH + config.SHADOW_RANGE)
     )
     ctx.lineCap = options.lineCap || 'round'
     ctx.lineJoin = options.lineJoin || 'round'
@@ -32,7 +32,7 @@ export default {
   },
 
   mapCoordinates (point) {
-    const ratio = config.canvasRatio
+    const ratio = config.CANVAS_RATIO
     point = point.map(coordinate => coordinate * ratio)
     return point
   },
@@ -42,48 +42,48 @@ export default {
       ctx.getImageData(0, 0, canvas.width, canvas.height)
     )
     let currentHistoryIndex = this.getCurrentHistoryIndex()
-    _imageDataHistory.splice(
+    IMAGE_DATA_HISTORY.splice(
       currentHistoryIndex + 1,
-      _imageDataHistory.length
+      IMAGE_DATA_HISTORY.length
     )
     currentHistoryIndex = (
-      _imageDataHistory.push(imageData) - 1
+      IMAGE_DATA_HISTORY.push(imageData) - 1
     )
     this.setCurrentHistoryIndex(currentHistoryIndex)
   },
 
   getImageDataHistory () {
-    return _imageDataHistory
+    return IMAGE_DATA_HISTORY
   },
 
   setCurrentHistoryIndex (index) {
-    _currentHistoryIndex = index
+    CURRENT_HISTORY_INDEX = index
     const imageDataHistory = this.getImageDataHistory()
     const imageData = imageDataHistory[index]
     ctx.putImageData(imageData, 0, 0)
   },
 
   getCurrentHistoryIndex () {
-    return _currentHistoryIndex
+    return CURRENT_HISTORY_INDEX
   },
 
   saveLastPoint (point) {
-    _lastPoint = point
+    LAST_POINT = point
   },
 
   getLastPoint () {
-    return _lastPoint
+    return LAST_POINT
   },
 
   clearLastSeriesPoints () {
-    _lastSeriesPoints = []
+    LAST_SERIES_POINTS = []
   },
 
   saveLastSeriesPoints (point) {
-    _lastSeriesPoints.push(point)
+    LAST_SERIES_POINTS.push(point)
   },
 
   getLastSeriesPoints () {
-    return _lastSeriesPoints
+    return LAST_SERIES_POINTS
   }
 }
