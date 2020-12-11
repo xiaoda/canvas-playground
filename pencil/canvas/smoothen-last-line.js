@@ -38,7 +38,7 @@ export default function smoothenLastLine () {
   const imageData = imageDataHistory[imageDataHistory.length - 2]
   ctx.putImageData(imageData, 0, 0)
   processingSeriesPoints.forEach((point, index) => {
-    if (index < 1) return
+    if (!index) return
     const lastPoint = processingSeriesPoints[index - 1]
     connectPointsByPixel(lastPoint, point)
   })

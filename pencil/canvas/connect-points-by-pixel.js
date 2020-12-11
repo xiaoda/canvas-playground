@@ -1,4 +1,4 @@
-import config from '../config.js'
+import config from './config.js'
 
 const DISTANCE_RANGE = config.LINE_WIDTH / 2
 const DISTANCE_LIMIT = DISTANCE_RANGE + config.SHADOW_RANGE

@@ -1,4 +1,4 @@
-import config from '../config.js'
+import config from './config.js'
 
 let IMAGE_DATA_HISTORY
 let CURRENT_HISTORY_INDEX

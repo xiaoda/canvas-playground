@@ -163,7 +163,7 @@ export default function straightenLastLine () {
   const imageData = imageDataHistory[imageDataHistory.length - 2]
   ctx.putImageData(imageData, 0, 0)
   obviousVertices.forEach((point, index) => {
-    if (index < 1) return
+    if (!index) return
     const lastPoint = obviousVertices[index - 1]
     connectPointsByPixel(lastPoint, point)
   })

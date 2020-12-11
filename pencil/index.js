@@ -1,4 +1,5 @@
-import CanvasUtils from './canvas.js'
+import canvasUtils from './canvas/index.js'
+import analysis from './analysis/index.js'
 
 /* Configs */
 const USE_PENCIL = 0
@@ -18,70 +19,72 @@ $canvas.on('touchstart', function (event) {
   const [touch] = event.touches
   const {touchType, clientX, clientY} = touch
   if (USE_PENCIL && touchType !== 'stylus') return
-  const point = CanvasUtils.mapCoordinates([clientX, clientY])
-  CanvasUtils.connectPointsByPixel(point)
-  CanvasUtils.saveLastPoint(point)
-  CanvasUtils.clearLastSeriesPoints()
-  CanvasUtils.saveLastSeriesPoints(point)
+  const point = canvasUtils.mapCoordinates([clientX, clientY])
+  canvasUtils.connectPointsByPixel(point)
+  canvasUtils.saveLastPoint(point)
+  canvasUtils.clearLastSeriesPoints()
+  canvasUtils.saveLastSeriesPoints(point)
 })
 
 $canvas.on('touchmove', function (event) {
   const [touch] = event.touches
   const {touchType, clientX, clientY} = touch
   if (USE_PENCIL && touchType !== 'stylus') return
-  const point = CanvasUtils.mapCoordinates([clientX, clientY])
-  const lastPoint = CanvasUtils.getLastPoint()
-  CanvasUtils.connectPointsByPixel(lastPoint, point)
-  CanvasUtils.saveLastPoint(point)
-  CanvasUtils.saveLastSeriesPoints(point)
+  const point = canvasUtils.mapCoordinates([clientX, clientY])
+  const lastPoint = canvasUtils.getLastPoint()
+  canvasUtils.connectPointsByPixel(lastPoint, point)
+  canvasUtils.saveLastPoint(point)
+  canvasUtils.saveLastSeriesPoints(point)
 })
 
 $canvas.on('touchend', function () {
-  CanvasUtils.saveImageDataHistory()
+  if (USE_PENCIL && touchType !== 'stylus') return
+  canvasUtils.saveImageDataHistory()
+  analysis.updateLastSeriesPoints()
   updateControls()
 })
 
 $clearButton.on('click', function () {
-  CanvasUtils.init()
+  canvasUtils.init()
   updateControls('init')
 })
 
 $backButton.on('click', function () {
-  let currentHistoryIndex = CanvasUtils.getCurrentHistoryIndex()
+  let currentHistoryIndex = canvasUtils.getCurrentHistoryIndex()
   if (currentHistoryIndex < 0) return
   currentHistoryIndex --
-  CanvasUtils.setCurrentHistoryIndex(currentHistoryIndex)
-  CanvasUtils.clearLastSeriesPoints()
+  canvasUtils.setCurrentHistoryIndex(currentHistoryIndex)
+  canvasUtils.clearLastSeriesPoints()
   updateControls()
 })
 
 $forwardButton.on('click', function () {
-  const imageDataHistory = CanvasUtils.getImageDataHistory()
-  let currentHistoryIndex = CanvasUtils.getCurrentHistoryIndex()
+  const imageDataHistory = canvasUtils.getImageDataHistory()
+  let currentHistoryIndex = canvasUtils.getCurrentHistoryIndex()
   if (currentHistoryIndex >= imageDataHistory.length - 1) return
   currentHistoryIndex ++
-  CanvasUtils.setCurrentHistoryIndex(currentHistoryIndex)
+  canvasUtils.setCurrentHistoryIndex(currentHistoryIndex)
   updateControls()
 })
 
 $smoothButton.on('click', function () {
-  CanvasUtils.smoothenLastLine()
-  CanvasUtils.saveImageDataHistory()
-  CanvasUtils.clearLastSeriesPoints()
+  canvasUtils.smoothenLastLine()
+  canvasUtils.saveImageDataHistory()
+  canvasUtils.clearLastSeriesPoints()
   updateControls()
 })
 
 $straightButton.on('click', function () {
-  CanvasUtils.straightenLastLine()
-  CanvasUtils.saveImageDataHistory()
-  CanvasUtils.clearLastSeriesPoints()
+  canvasUtils.straightenLastLine()
+  canvasUtils.saveImageDataHistory()
+  canvasUtils.clearLastSeriesPoints()
   updateControls()
 })
 
 /* Functions */
 function updateControls (timing) {
-  const imageDataHistory = CanvasUtils.getImageDataHistory()
-  const currentHistoryIndex = CanvasUtils.getCurrentHistoryIndex()
+  const imageDataHistory = canvasUtils.getImageDataHistory()
+  const currentHistoryIndex = canvasUtils.getCurrentHistoryIndex()
   const disabled = 'disabled'
   timing === 'init' ?
     $clearButton.attr({disabled}) :
@@ -92,7 +95,7 @@ function updateControls (timing) {
   currentHistoryIndex < imageDataHistory.length - 1 ?
     $forwardButton.removeAttr('disabled') :
     $forwardButton.attr({disabled})
-  const lastSeriesPoints = CanvasUtils.getLastSeriesPoints()
+  const lastSeriesPoints = canvasUtils.getLastSeriesPoints()
   if (lastSeriesPoints.length) {
     $smoothButton.removeAttr('disabled')
     $straightButton.removeAttr('disabled')
@@ -103,5 +106,5 @@ function updateControls (timing) {
 }
 
 /* Init */
-CanvasUtils.init()
-CanvasUtils.setLineStyles()
+canvasUtils.init()
+canvasUtils.setLineStyles()
