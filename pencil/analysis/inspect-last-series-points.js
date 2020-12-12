@@ -1,6 +1,6 @@
 import common from '../canvas/common.js'
 
-export default function updateLastSeriesPoints () {
+export default function inspectLastSeriesPoints () {
   const lastSeriesPoints = common.getLastSeriesPoints()
   const pointsDistance = []
   lastSeriesPoints.forEach((point, index) => {

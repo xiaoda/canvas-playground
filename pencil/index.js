@@ -2,7 +2,7 @@ import canvasUtils from './canvas/index.js'
 import analysis from './analysis/index.js'
 
 /* Configs */
-const USE_PENCIL = 0
+const USE_PENCIL = 1
 
 /* Constants */
 const $canvas = $('#canvas')
@@ -14,11 +14,15 @@ const $forwardButton = $('#forward')
 const $smoothButton = $('#smooth')
 const $straightButton = $('#straight')
 
+/* Variables */
+let isTouchStarted = false
+
 /* Events */
 $canvas.on('touchstart', function (event) {
   const [touch] = event.touches
   const {touchType, clientX, clientY} = touch
   if (USE_PENCIL && touchType !== 'stylus') return
+  isTouchStarted = true
   const point = canvasUtils.mapCoordinates([clientX, clientY])
   canvasUtils.connectPointsByPixel(point)
   canvasUtils.saveLastPoint(point)
@@ -37,10 +41,11 @@ $canvas.on('touchmove', function (event) {
   canvasUtils.saveLastSeriesPoints(point)
 })
 
-$canvas.on('touchend', function () {
-  if (USE_PENCIL && touchType !== 'stylus') return
+$canvas.on('touchend', function (event) {
+  if (!isTouchStarted) return
+  isTouchStarted = false
   canvasUtils.saveImageDataHistory()
-  analysis.updateLastSeriesPoints()
+  analysis.inspectLastSeriesPoints()
   updateControls()
 })
 

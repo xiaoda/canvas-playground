@@ -37,6 +37,10 @@ export default {
     return point
   },
 
+  /* Image data */
+  getImageDataHistory () {
+    return IMAGE_DATA_HISTORY
+  },
   saveImageDataHistory (imageData) {
     imageData = imageData ? imageData : (
       ctx.getImageData(0, 0, canvas.width, canvas.height)
@@ -52,10 +56,10 @@ export default {
     this.setCurrentHistoryIndex(currentHistoryIndex)
   },
 
-  getImageDataHistory () {
-    return IMAGE_DATA_HISTORY
+  /* History index */
+  getCurrentHistoryIndex () {
+    return CURRENT_HISTORY_INDEX
   },
-
   setCurrentHistoryIndex (index) {
     CURRENT_HISTORY_INDEX = index
     const imageDataHistory = this.getImageDataHistory()
@@ -63,27 +67,25 @@ export default {
     ctx.putImageData(imageData, 0, 0)
   },
 
-  getCurrentHistoryIndex () {
-    return CURRENT_HISTORY_INDEX
+  /* Last point */
+  getLastPoint () {
+    return LAST_POINT
   },
-
   saveLastPoint (point) {
     LAST_POINT = point
   },
 
-  getLastPoint () {
-    return LAST_POINT
+  /* Last series points */
+  getLastSeriesPoints () {
+    return LAST_SERIES_POINTS
   },
-
-  clearLastSeriesPoints () {
-    LAST_SERIES_POINTS = []
-  },
-
   saveLastSeriesPoints (point) {
     LAST_SERIES_POINTS.push(point)
   },
-
-  getLastSeriesPoints () {
-    return LAST_SERIES_POINTS
+  updateLastSeriesPoints (points) {
+    LAST_SERIES_POINTS = points
+  },
+  clearLastSeriesPoints () {
+    LAST_SERIES_POINTS = []
   }
 }
