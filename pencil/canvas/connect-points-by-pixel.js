@@ -49,7 +49,7 @@ export default function connectPointsByPixel (
   const yBoundaries = getBoundaries(pointA[1], pointB[1])
   const xBoundariesLength = xBoundaries[1] - xBoundaries[0]
   const yBoundariesLength = yBoundaries[1] - yBoundaries[0]
-  const imageData = ctx.getImageData(
+  const imageData = window.ctx.getImageData(
     xBoundaries[0], yBoundaries[0],
     xBoundariesLength, yBoundariesLength
   )
@@ -76,7 +76,7 @@ export default function connectPointsByPixel (
       }
     }
   }
-  ctx.putImageData(
+  window.ctx.putImageData(
     imageData, xBoundaries[0], yBoundaries[0]
   )
 }

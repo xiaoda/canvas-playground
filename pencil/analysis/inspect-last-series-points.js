@@ -10,15 +10,11 @@ export default function inspectLastSeriesPoints () {
       .getDistanceBetweenPoints(lastPoint, point)
     pointsDistance.push(distance)
   })
-  const pointsDistanceSum = pointsDistance
-    .reduce((sum, current) => sum + current)
+  const pointsTotalDistance = pointsDistance
+    .reduce((total, current) => total + current)
   const averagePointsDistance = (
-    pointsDistanceSum /
+    pointsTotalDistance /
     (pointsDistance.length - 1)
-  )
-  console.warn(
-    'Last Series Points Count',
-    lastSeriesPoints.length
   )
   console.warn(
     'Average Points Distance',

@@ -6,44 +6,51 @@ let LAST_POINT
 let LAST_SERIES_POINTS
 
 export default {
+  /* Base */
   init () {
     IMAGE_DATA_HISTORY = []
     CURRENT_HISTORY_INDEX = 0
     LAST_POINT = []
     LAST_SERIES_POINTS = []
 
-    canvas.style.width = `${window.innerWidth}px`
-    canvas.style.height = `${window.innerHeight}px`
-    canvas.width = window.innerWidth * config.CANVAS_RATIO
-    canvas.height = window.innerHeight * config.CANVAS_RATIO
-    ctx.fillStyle = '#FFF'
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    window.canvas.style.width = `${window.innerWidth}px`
+    window.canvas.style.height = `${window.innerHeight}px`
+    window.canvas.width = window.innerWidth * config.CANVAS_RATIO
+    window.canvas.height = window.innerHeight * config.CANVAS_RATIO
+    window.ctx.fillStyle = '#FFF'
+    window.ctx.fillRect(
+      0, 0,
+      window.canvas.width,
+      window.canvas.height
+    )
     this.saveImageDataHistory()
   },
-
   setLineStyles (options = {}) {
-    ctx.lineWidth = (
+    window.ctx.lineWidth = (
       options.lineWidth ||
       (config.LINE_WIDTH + config.SHADOW_RANGE)
     )
-    ctx.lineCap = options.lineCap || 'round'
-    ctx.lineJoin = options.lineJoin || 'round'
-    ctx.strokeStyle = options.strokeStyle || '#222'
+    window.ctx.lineCap = options.lineCap || 'round'
+    window.ctx.lineJoin = options.lineJoin || 'round'
+    window.ctx.strokeStyle = options.strokeStyle || '#222'
   },
-
   mapCoordinates (point) {
     const ratio = config.CANVAS_RATIO
     point = point.map(coordinate => coordinate * ratio)
     return point
   },
 
-  /* Image data */
+  /* History */
   getImageDataHistory () {
     return IMAGE_DATA_HISTORY
   },
   saveImageDataHistory (imageData) {
     imageData = imageData ? imageData : (
-      ctx.getImageData(0, 0, canvas.width, canvas.height)
+      window.ctx.getImageData(
+        0, 0,
+        window.canvas.width,
+        window.canvas.height
+      )
     )
     let currentHistoryIndex = this.getCurrentHistoryIndex()
     IMAGE_DATA_HISTORY.splice(
@@ -55,8 +62,6 @@ export default {
     )
     this.setCurrentHistoryIndex(currentHistoryIndex)
   },
-
-  /* History index */
   getCurrentHistoryIndex () {
     return CURRENT_HISTORY_INDEX
   },
@@ -64,7 +69,7 @@ export default {
     CURRENT_HISTORY_INDEX = index
     const imageDataHistory = this.getImageDataHistory()
     const imageData = imageDataHistory[index]
-    ctx.putImageData(imageData, 0, 0)
+    window.ctx.putImageData(imageData, 0, 0)
   },
 
   /* Last point */

@@ -40,7 +40,7 @@ export default function smoothenLastLine () {
   )
   const imageDataHistory = common.getImageDataHistory()
   const imageData = imageDataHistory[imageDataHistory.length - 2]
-  ctx.putImageData(imageData, 0, 0)
+  window.ctx.putImageData(imageData, 0, 0)
   processingSeriesPoints.forEach((point, index) => {
     if (!index) return
     const lastPoint = processingSeriesPoints[index - 1]

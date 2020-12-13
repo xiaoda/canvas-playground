@@ -3,8 +3,8 @@ export default function connectPoints (
 ) {
   if (!pointA) return
   else if (!pointB) pointB = pointA
-  ctx.beginPath()
-  ctx.moveTo(...pointA)
-  ctx.lineTo(...pointB)
-  ctx.stroke()
+  window.ctx.beginPath()
+  window.ctx.moveTo(...pointA)
+  window.ctx.lineTo(...pointB)
+  window.ctx.stroke()
 }
