@@ -15,14 +15,14 @@ const $smoothButton = $('#smooth')
 const $straightButton = $('#straight')
 
 /* Variables */
-let isTouched = false
+let IS_TOUCHED = false
 
 /* Events */
 $canvas.on('touchstart', function (event) {
   const [touch] = event.touches
   const {touchType, clientX, clientY} = touch
   if (USE_PENCIL && touchType !== 'stylus') return
-  isTouched = true
+  IS_TOUCHED = true
   const point = canvasUtils.mapCoordinates([clientX, clientY])
   canvasUtils.connectPointsByPixel(point)
   canvasUtils.saveLastPoint(point)
@@ -42,8 +42,8 @@ $canvas.on('touchmove', function (event) {
 })
 
 $canvas.on('touchend', function (event) {
-  if (!isTouched) return
-  isTouched = false
+  if (!IS_TOUCHED) return
+  IS_TOUCHED = false
   canvasUtils.saveImageDataHistory()
   analysis.inspectLastSeriesPoints()
   updateControls()
@@ -67,7 +67,7 @@ $forwardButton.on('click', function () {
   const imageDataHistory = canvasUtils.getImageDataHistory()
   let currentHistoryIndex = canvasUtils.getCurrentHistoryIndex()
   if (currentHistoryIndex >= imageDataHistory.length - 1) return
-  currentHistoryIndex ++
+  currentHistoryIndex++
   canvasUtils.setCurrentHistoryIndex(currentHistoryIndex)
   updateControls()
 })

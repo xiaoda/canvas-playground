@@ -320,6 +320,28 @@ const GeometryUtils = {
     return verticalDirection
   },
 
+  isSameDirection (directionA, directionB) {
+    return (
+      (
+        directionA[0] / directionB[0] ===
+        directionA[1] / directionB[1]
+      ) &&
+      directionA[0] * directionB[0] >= 0 &&
+      directionA[1] * directionB[1] >= 0
+    )
+  },
+
+  isOppositeDirection (directionA, directionB) {
+    return (
+      (
+        directionA[0] / directionB[0] ===
+        directionA[1] / directionB[1]
+      ) &&
+      directionA[0] * directionB[0] <= 0 &&
+      directionA[1] * directionB[1] <= 0
+    )
+  },
+
   getVector (pointA, pointB) {
     return this.getDirection(pointA, pointB)
   },
@@ -489,6 +511,49 @@ const GeometryUtils = {
     )
   },
 
+  getCrossPointFromPointToLine (
+    vertexA, vertexB, point
+  ) {
+    const crossPoint = []
+    if (vertexA[0] === vertexB[0]) {
+      crossPoint[0] = vertexA[0]
+      crossPoint[1] = point[1]
+    } else if (vertexA[1] === vertexB[1]) {
+      crossPoint[0] = point[0]
+      crossPoint[1] = vertexA[1]
+    } else {
+      const a = (
+        (vertexA[1] - vertexB[1]) /
+        (vertexA[0] - vertexB[0])
+      )
+      const b = vertexA[1] - a * vertexA[0]
+      const c = -1 / a
+      const d = point[1] - c * point[0]
+      crossPoint[0] = (d - b) / (a - c)
+      crossPoint[1] = a * crossPoint[0] + b
+    }
+    return crossPoint
+  },
+
+  getDistanceFromPointToLine (
+    vertexA, vertexB, point
+  ) {
+    let distance
+    if (vertexA[0] === vertexB[0]) {
+      distance = Math.abs(point[0] - vertexA[0])
+    } else if (vertexA[1] === vertexB[1]) {
+      distance = Math.abs(point[1] - vertexA[1])
+    } else {
+      const crossPoint = this.getCrossPointFromPointToLine(
+        vertexA, vertexB, point
+      )
+      distance = this.getDistanceBetweenPoints(
+        point, crossPoint
+      )
+    }
+    return distance
+  },
+
   getDistanceFromPointToLineSegment (
     vertexA, vertexB, point
   ) {
@@ -522,16 +587,9 @@ const GeometryUtils = {
         )
       )
     } else {
-      const a = (
-        (vertexA[1] - vertexB[1]) /
-        (vertexA[0] - vertexB[0])
+      const crossPoint = this.getCrossPointFromPointToLine(
+        vertexA, vertexB, point
       )
-      const b = vertexA[1] - a * vertexA[0]
-      const c = -1 / a
-      const d = point[1] - c * point[0]
-      const crossPoint = []
-      crossPoint[0] = (d - b) / (a - c)
-      crossPoint[1] = a * crossPoint[0] + b
       distance = (
         this.isBetween(
           vertexA[0], vertexB[0], crossPoint[0]
