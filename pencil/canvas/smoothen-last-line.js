@@ -1,8 +1,8 @@
 import common from './common.js'
 import connectPointsByPixel from './connect-points-by-pixel.js'
 
-const PROCESS_RATIO = [.4, .2, .4]
-const REPEATEDLY_PROCESS_TIMES = 10
+const PROCESS_RATIO = [.3, .4, .3]
+const REPEATEDLY_PROCESS_TIMES = 2
 
 function processSeriesPoints (points) {
   let newPoints = []

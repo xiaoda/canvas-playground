@@ -1,8 +1,8 @@
 import common from '../canvas/common.js'
 
 const UPDATE_ORIGINAL_POINTS = true
-const TARGET_CLOSEST_POINTS_DISTANCE = 25
-const SIDE_POINTS_WEIGHT = .2
+const TARGET_CLOSEST_POINTS_DISTANCE = 16
+const SIDE_POINTS_WEIGHT = .05
 
 function getAveragePointsDistance (points) {
   const pointsDistance = []
@@ -55,7 +55,7 @@ function inspectClosestPoints (
         .getDirection(midPoint, crossPoint)
       const isSameDirection = GeometryUtils
         .isSameDirection(tempDirection, verticalDirection)
-      const signedOffset = offset * (isSameDirection ? 1 : -1)
+      const signedOffset = offset * (isSameDirection ? -1 : 1)
       return signedOffset
     }
     let totalOffset = 0
