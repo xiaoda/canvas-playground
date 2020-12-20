@@ -11,8 +11,7 @@ window.ctx = canvas.getContext('2d')
 const $clearButton = $('#clear')
 const $backButton = $('#back')
 const $forwardButton = $('#forward')
-const $smoothButton = $('#smooth')
-const $straightButton = $('#straight')
+const $transformButtons = $('[data-transform]')
 
 /* Variables */
 let IS_TOUCHED = false
@@ -57,7 +56,7 @@ $clearButton.on('click', function () {
 $backButton.on('click', function () {
   let currentHistoryIndex = canvasUtils.getCurrentHistoryIndex()
   if (currentHistoryIndex < 0) return
-  currentHistoryIndex --
+  currentHistoryIndex--
   canvasUtils.setCurrentHistoryIndex(currentHistoryIndex)
   canvasUtils.clearLastSeriesPoints()
   updateControls()
@@ -72,15 +71,9 @@ $forwardButton.on('click', function () {
   updateControls()
 })
 
-$smoothButton.on('click', function () {
-  canvasUtils.smoothenLastLine()
-  canvasUtils.saveImageDataHistory()
-  canvasUtils.clearLastSeriesPoints()
-  updateControls()
-})
-
-$straightButton.on('click', function () {
-  canvasUtils.straightenLastLine()
+$transformButtons.on('click', function () {
+  const transform = $(this).data('transform')
+  canvasUtils[transform]()
   canvasUtils.saveImageDataHistory()
   canvasUtils.clearLastSeriesPoints()
   updateControls()
@@ -90,6 +83,7 @@ $straightButton.on('click', function () {
 function updateControls (timing) {
   const imageDataHistory = canvasUtils.getImageDataHistory()
   const currentHistoryIndex = canvasUtils.getCurrentHistoryIndex()
+  const lastSeriesPoints = canvasUtils.getLastSeriesPoints()
   const disabled = 'disabled'
   timing === 'init' ?
     $clearButton.attr({disabled}) :
@@ -100,14 +94,9 @@ function updateControls (timing) {
   currentHistoryIndex < imageDataHistory.length - 1 ?
     $forwardButton.removeAttr('disabled') :
     $forwardButton.attr({disabled})
-  const lastSeriesPoints = canvasUtils.getLastSeriesPoints()
-  if (lastSeriesPoints.length) {
-    $smoothButton.removeAttr('disabled')
-    $straightButton.removeAttr('disabled')
-  } else {
-    $smoothButton.attr({disabled})
-    $straightButton.attr({disabled})
-  }
+  lastSeriesPoints.length ?
+    $transformButtons.removeAttr('disabled') :
+    $transformButtons.attr({disabled})
 }
 
 /* Init */

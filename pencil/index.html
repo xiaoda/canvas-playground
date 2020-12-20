@@ -18,18 +18,43 @@
       text-align: right;
     }
   </style>
+  <script>
+    function capitalize (word) {
+      return `${word[0].toUpperCase()}${word.slice(1)}`
+    }
+  </script>
 </head>
 <body>
   <canvas id="canvas"></canvas>
   <div id="control">
     <div>
-      <button id="clear" disabled>Clear</button>
-      <button id="back" disabled>Back</button>
-      <button id="forward" disabled>Forward</button>
+      <script>
+        const basicButtons = ['clear', 'back', 'forward']
+        document.write(basicButtons.map(button => {
+          return `
+            <button id="${button}" disabled>
+              ${capitalize(button)}
+            </button>
+          `
+        }).join('\n'))
+      </script>
     </div>
     <div>
-      <button id="smooth" disabled>Smooth</button>
-      <button id="straight" disabled>Straight</button>
+      <script>
+        const transformButtons = {
+          smooth: 'smoothenLastLine',
+          straight: 'straightenLastLine',
+          polygon: 'makeLastLinePolygon'
+        }
+        document.write(Object.keys(transformButtons).map(name => {
+          const fun = transformButtons[name]
+          return `
+            <button data-transform="${fun}" disabled>
+              ${capitalize(name)}
+            </button>
+          `
+        }).join('\n'))
+      </script>
     </div>
   </div>
 

@@ -3,7 +3,7 @@ import connectPointsByPixel from './connect-points-by-pixel.js'
 
 const ACCUMULATED_RANGE = 5
 const NEARBY_RANGE = 5
-const ACCUMULATED_RATE_LIMIT = .5
+const ACCUMULATED_RATE_LIMIT = .6
 const VERTICES_RATE_LIMIT = .3
 
 function getRateOfChange (

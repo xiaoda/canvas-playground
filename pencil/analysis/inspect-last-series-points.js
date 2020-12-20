@@ -2,6 +2,7 @@ import common from '../canvas/common.js'
 
 const UPDATE_ORIGINAL_POINTS = true
 const TARGET_CLOSEST_POINTS_DISTANCE = 25
+const SIDE_POINTS_WEIGHT = .2
 
 function getAveragePointsDistance (points) {
   const pointsDistance = []
@@ -31,6 +32,7 @@ function inspectClosestPoints (
 ) {
   const distance = GeometryUtils
     .getDistanceBetweenPoints(lastPoint, point)
+  const resultPoints = []
   if (distance > TARGET_CLOSEST_POINTS_DISTANCE) {
     const midPoint = GeometryUtils
       .getMidPointBetweenPoints(lastPoint, point)
@@ -48,7 +50,7 @@ function inspectClosestPoints (
         .getDistanceFromPointToLine(vertexA, vertexB, point)
         * distance / tempDistance
       const crossPoint = GeometryUtils
-        .getCrossPointFromPointToLine(midPoint, virtualPoint, point)
+        .getVerticalCrossPointFromPointToLine(midPoint, virtualPoint, point)
       const tempDirection = GeometryUtils
         .getDirection(midPoint, crossPoint)
       const isSameDirection = GeometryUtils
@@ -67,12 +69,12 @@ function inspectClosestPoints (
         lastPoint, point, nextPoint
       )
     }
-    totalOffset *= .2
+    totalOffset *= SIDE_POINTS_WEIGHT
     const generatedPoint = GeometryUtils
       .getPointByPointDirectionDistance(
         midPoint, verticalDirection, totalOffset
       )
-    return [
+    resultPoints.push(
       ...inspectClosestPoints(
         secondlastPoint, lastPoint, generatedPoint, point
       ),
@@ -80,10 +82,9 @@ function inspectClosestPoints (
       ...inspectClosestPoints(
         lastPoint, generatedPoint, point, nextPoint
       )
-    ]
-  } else {
-    return []
+    )
   }
+  return resultPoints
 }
 
 export default function inspectLastSeriesPoints () {
