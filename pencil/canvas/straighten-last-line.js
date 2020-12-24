@@ -2,8 +2,8 @@ import common from './common.js'
 import connectPointsByPixel from './connect-points-by-pixel.js'
 
 const ACCUMULATED_RANGE = 5
-const NEARBY_RANGE = 5
-const ACCUMULATED_RATE_LIMIT = .6
+const NEARBY_RANGE = 9
+const ACCUMULATED_RATE_LIMIT = .5
 const VERTICES_RATE_LIMIT = .3
 
 function getRateOfChange (
@@ -73,7 +73,7 @@ export default function straightenLastLine () {
   })
 
   /* Part C */
-  const verticesIndex = []
+  const verticesIndex = [0]
   pointsAccumulatedRate.forEach((accumulatedRate, index) => {
     if (
       Math.abs(accumulatedRate) < ACCUMULATED_RATE_LIMIT
@@ -119,16 +119,27 @@ export default function straightenLastLine () {
       .findIndex(rate => rate === biggestRate)
     const biggestRateIndex = possibleRatesIndex[biggestRateTempIndex]
     const vertexIndex = biggestRateIndex + 1
-    if (verticesIndex.includes(vertexIndex)) return
+    const lastVertexIndex = verticesIndex[verticesIndex.length - 1]
+    if (vertexIndex - lastVertexIndex < NEARBY_RANGE) {
+      if (!lastVertexIndex) return
+      const vertexRateOfChange =
+        pointsRateOfChange[vertexIndex - 1]
+      const lastVertexRateOfChange =
+        pointsRateOfChange[lastVertexIndex - 1]
+      if (vertexRateOfChange > lastVertexRateOfChange) {
+        verticesIndex.pop()
+      } else return
+    }
     verticesIndex.push(vertexIndex)
   })
-  const vertices = [
-    lastSeriesPoints[0],
-    ...verticesIndex.map(index => {
-      return lastSeriesPoints[index]
-    }),
-    lastSeriesPoints[lastSeriesPoints.length - 1]
-  ]
+  if (
+    lastSeriesPoints.length - 1 -
+    verticesIndex[verticesIndex.length - 1] < NEARBY_RANGE
+  ) verticesIndex.pop()
+  verticesIndex.push(lastSeriesPoints.length - 1)
+  const vertices = verticesIndex.map(index => {
+    return lastSeriesPoints[index]
+  })
 
   /* Part D */
   const verticesRateOfChange = []

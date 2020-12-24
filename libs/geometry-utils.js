@@ -514,7 +514,77 @@ const GeometryUtils = {
   getCrossPointBetweenLines (lineA, lineB) {
     const [pointA1, pointA2] = lineA
     const [pointB1, pointB2] = lineB
-    // todo
+    const slopeA =
+      (pointA2[1] - pointA1[1]) /
+      (pointA2[0] - pointA1[0])
+    const slopeB =
+      (pointB2[1] - pointB1[1]) /
+      (pointB2[0] - pointB1[0])
+    const isLineAVertical = pointA1[0] === pointA2[0]
+    const isLineAHorizontal = pointA1[1] === pointA2[1]
+    const isLineBVertical = pointB1[0] === pointB2[0]
+    const isLineBHorizontal = pointB1[1] === pointB2[1]
+
+    function getCrossPointInVerticalSituation (
+      firstPoint, secondPoint, thirdPoint
+    ) {
+      const crossPoint = []
+      crossPoint[0] = firstPoint[0]
+      crossPoint[1] =
+        (crossPoint[0] - secondPoint[0]) *
+        (secondPoint[1] - thirdPoint[1]) /
+        (secondPoint[0] - thirdPoint[0]) +
+        secondPoint[1]
+      return crossPoint
+    }
+    function getCrossPointInHorizontalSituation (
+      firstPoint, secondPoint, thirdPoint
+    ) {
+      const crossPoint = []
+      crossPoint[1] = firstPoint[1]
+      crossPoint[0] =
+        (crossPoint[1] - secondPoint[1]) *
+        (secondPoint[0] - thirdPoint[0]) /
+        (secondPoint[1] - thirdPoint[1]) +
+        secondPoint[0]
+      return crossPoint
+    }
+
+    let crossPoint = []
+    if (slopeA === slopeB) {
+      crossPoint = null
+    } else if (isLineAVertical && isLineBHorizontal) {
+      crossPoint = [pointA1[0], pointB1[1]]
+    } else if (isLineAHorizontal && isLineBVertical) {
+      crossPoint = [pointB1[0], pointA1[1]]
+    } else if (isLineAVertical) {
+      crossPoint = getCrossPointInVerticalSituation(
+        pointA1, pointB1, pointB2
+      )
+    } else if (isLineAHorizontal) {
+      crossPoint = getCrossPointInHorizontalSituation(
+        pointA1, pointB1, pointB2
+      )
+    } else if (isLineBVertical) {
+      crossPoint = getCrossPointInVerticalSituation(
+        pointB1, pointA1, pointA2
+      )
+    } else if (isLineBHorizontal) {
+      crossPoint = getCrossPointInHorizontalSituation(
+        pointB1, pointA1, pointA2
+      )
+    } else {
+      crossPoint[0] = (
+        slopeA * pointA1[0] -
+        slopeB * pointB1[0] -
+        pointA1[1] +
+        pointB1[1]
+      ) / (slopeA - slopeB)
+      crossPoint[1] =
+        slopeA * (crossPoint[0] - pointA1[0]) +
+        pointA1[1]
+    }
+    return crossPoint
   },
 
   getVerticalCrossPointFromPointToLine (
