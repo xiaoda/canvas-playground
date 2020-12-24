@@ -1,8 +1,8 @@
 import common from './common.js'
 import connectPointsByPixel from './connect-points-by-pixel.js'
 
-const ACCUMULATED_RANGE = 5
-const NEARBY_RANGE = 9
+const ACCUMULATED_RANGE = 3
+const NEARBY_RANGE = 5
 const ACCUMULATED_RATE_LIMIT = .5
 const VERTICES_RATE_LIMIT = .3
 
