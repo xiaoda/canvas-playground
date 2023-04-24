@@ -1,4 +1,4 @@
 # Canvas Playground
 
 ## Pencil
-A pencil canvas on iPad, with original algorithms. [Link](pencil/README.md)
+A pencil canvas on iPad, with original algorithms. [Link](pencil/)
